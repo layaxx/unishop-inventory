@@ -15,7 +15,12 @@ export default resolver.pipe(
     // TODO: in multi-tenant app, you must add validation to ensure correct tenant
     const productModifierType = await db.productModifierType.findFirst({
       where: { productId },
-      include: { values: { include: { ProductVariant: true }, orderBy: { order: "asc" } } },
+      include: {
+        values: {
+          include: { ProductVariant: { include: { stockLevels: true } } },
+          orderBy: { order: "asc" },
+        },
+      },
     })
 
     if (!productModifierType) throw new NotFoundError()

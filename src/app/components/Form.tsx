@@ -9,6 +9,7 @@ export interface FormProps<S extends z.ZodType<any, any>>
   children?: ReactNode
   /** Text to display in the submit button */
   submitText?: string
+  resetText?: string
   schema?: S
   onSubmit: (values: z.infer<S>) => Promise<void | OnSubmitResult>
   initialValues?: FormikProps<z.infer<S>>["initialValues"]
@@ -24,6 +25,7 @@ export const FORM_ERROR = "FORM_ERROR"
 export function Form<S extends z.ZodType<any, any>>({
   children,
   submitText,
+  resetText,
   schema,
   initialValues,
   onSubmit,
@@ -60,6 +62,12 @@ export function Form<S extends z.ZodType<any, any>>({
           {submitText && (
             <button type="submit" disabled={isSubmitting}>
               {submitText}
+            </button>
+          )}
+
+          {resetText && (
+            <button type="reset" disabled={isSubmitting}>
+              {resetText}
             </button>
           )}
 

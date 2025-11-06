@@ -26,3 +26,12 @@ export const CreateProductModifierValueSchema = z.object({
   value: z.string(),
   modifierTypeId: z.number(),
 })
+
+export const UpdateProductModifierValueSchema = z.object({
+  id: z.number(),
+  value: z.string(),
+  order: z.number().optional(),
+})
+export const DeleteProductModifierValueSchema = z.object({
+  id: z.number(),
+})

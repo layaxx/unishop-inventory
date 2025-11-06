@@ -9,6 +9,16 @@ import { Route } from "next"
 
 const ITEMS_PER_PAGE = 100
 
+function getStockCount(product: any) {
+  return product.variants.reduce((acc: number, variant: any) => {
+    const variantStock = variant.stockLevels.reduce(
+      (variantAcc: number, stockLevel: any) => variantAcc + stockLevel.quantity,
+      0
+    )
+    return acc + variantStock
+  }, 0)
+}
+
 export const ProductsList = () => {
   const searchparams = useSearchParams()!
   const page = Number(searchparams.get("page")) || 0
@@ -39,7 +49,9 @@ export const ProductsList = () => {
       <ul>
         {products?.map((product) => (
           <li key={product.id}>
-            <Link href={`/products/${product.id}`}>{product.name}</Link>
+            <Link href={`/products/${product.id}`}>
+              {product.name} ({product.variants.length} Variants) [{getStockCount(product)} items]
+            </Link>
           </li>
         ))}
       </ul>

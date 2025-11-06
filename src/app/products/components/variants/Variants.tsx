@@ -4,6 +4,9 @@ import { FC } from "react"
 import AddModifier from "./AddModifier"
 import getProductModifierType from "../../queries/getProductModifierType"
 import AddModifierValue from "./AddModifierValue"
+import ModifierValue from "./ModifierValue"
+import { VariantTable } from "./VariantTable"
+import { columns } from "./VariantColumn"
 
 const Variants: FC<{ productId: number }> = ({ productId }) => {
   const [type, { isLoading }] = useQuery(getProductModifierType, {
@@ -21,14 +24,14 @@ const Variants: FC<{ productId: number }> = ({ productId }) => {
   return (
     <>
       <h3>{type.name}</h3>
-      <ul>
+      <div>
         {type.values?.map((value) => (
-          <li key={value.id}>
-            {type.name}: {value.value} <button>Edit</button>
-          </li>
+          <ModifierValue value={value} type={type} key={value.id} />
         ))}
         <AddModifierValue modifierTypeId={type.id} />
-      </ul>
+
+        <VariantTable columns={columns} data={[]} />
+      </div>
     </>
   )
 }
