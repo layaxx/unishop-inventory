@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -63,3 +63,109 @@ model Token {
 // enum TokenType {
 //   RESET_PASSWORD
 // }
+/// INVENTORY MANAGEMENT SCHEMA (Normalized Variant Model)
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  stockLevels   StockLevel[]
+  movementsFrom Movement[]   @relation("MovementFrom")
+  movementsTo   Movement[]   @relation("MovementTo")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  sku         String?  @unique
+  image       String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  variants              ProductVariant[]
+  modifierType          ProductModifierType? @relation()
+  productModifierTypeId Int?
+}
+
+/// ModifierType defines *what kind* of modifier (e.g., Color, Size)
+model ProductModifierType {
+  id        Int      @id @default(autoincrement())
+  name      String // e.g. "Color"
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  values ProductModifierValue[]
+}
+
+/// ModifierValue defines each possible value of a modifier (e.g., "Red", "Black")
+model ProductModifierValue {
+  id             Int                 @id @default(autoincrement())
+  value          String
+  modifierType   ProductModifierType @relation(fields: [modifierTypeId], references: [id])
+  modifierTypeId Int
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  order          Int                 @default(autoincrement())
+
+  ProductVariant ProductVariant[]
+}
+
+/// ProductVariant represents a concrete SKU (e.g. "T-Shirt – Black – M")
+model ProductVariant {
+  id        Int      @id @default(autoincrement())
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  image     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  stockLevels            StockLevel[]
+  movements              Movement[]
+  modifierValue          ProductModifierValue @relation(fields: [productModifierValueId], references: [id])
+  productModifierValueId Int
+}
+
+model Movement {
+  id       Int          @id @default(autoincrement())
+  date     DateTime     @default(now())
+  type     MovementType
+  quantity Int
+
+  from   Location? @relation("MovementFrom", fields: [fromId], references: [id])
+  fromId Int?
+  to     Location? @relation("MovementTo", fields: [toId], references: [id])
+  toId   Int?
+
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  variantId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model StockLevel {
+  id         Int            @id @default(autoincrement())
+  location   Location       @relation(fields: [locationId], references: [id])
+  locationId Int
+  variant    ProductVariant @relation(fields: [variantId], references: [id])
+  variantId  Int
+  quantity   Int            @default(0)
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([locationId, variantId])
+}
+
+enum MovementType {
+  PURCHASE
+  SALE
+  TRANSFER
+  ADJUSTMENT
+}
