@@ -1,9 +1,7 @@
-import { vi, describe, it, beforeEach } from "vitest"
+import { describe, it, beforeEach } from "vitest"
 import db from "db"
-import { Ctx } from "@blitzjs/next"
 import createProductModifierValue from "./createProductModifierValue"
 import { mockCtx } from "@/test/createMockContext"
-import { e } from "@blitzjs/auth/dist/index-25cd3bb6"
 
 async function makeProduct() {
   return await db.product.create({

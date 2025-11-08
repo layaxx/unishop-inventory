@@ -10,6 +10,7 @@ export default resolver.pipe(
   async ({ id }) => {
     const existing = await db.productModifierValue.findUnique({
       where: { id },
+      include: { modifierType: { include: { values: true } } },
     })
     if (!existing) {
       throw new Error("Modifier value not found")
@@ -20,13 +21,25 @@ export default resolver.pipe(
       select: { quantity: true },
     })
 
-    const totalStock = stockLevels.reduce((acc, curr) => acc + curr.quantity, 0)
+    const hasNonZeroStock = stockLevels.some((sl) => sl.quantity > 0)
 
-    if (totalStock > 0) {
+    if (hasNonZeroStock) {
       throw new Error("Cannot delete modifier value with existing stock levels")
     }
 
-    await db.productVariant.deleteMany({ where: { modifierValues: { some: { id } } } })
+    if (existing.modifierType.values.length > 1) {
+      return await db.$transaction(async (tx) => {
+        await tx.stockLevel.deleteMany({
+          where: { variant: { modifierValues: { some: { id } } } },
+        })
+
+        await tx.productVariant.deleteMany({
+          where: { modifierValues: { some: { id } } },
+        })
+
+        return await tx.productModifierValue.deleteMany({ where: { id } })
+      })
+    }
 
     const value = await db.productModifierValue.deleteMany({ where: { id } })
 

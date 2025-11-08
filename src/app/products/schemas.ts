@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const CreateProductSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1),
   image: z.string().optional(),
   description: z.string().optional(),
   productModifierTypeId: z.number().optional(),
@@ -17,12 +17,12 @@ export const DeleteProductSchema = z.object({
 })
 
 export const CreateProductModifierTypeSchema = z.object({
-  name: z.string(),
+  name: z.string().min(1),
   productId: z.number(),
 })
 
 export const CreateProductModifierValueSchema = z.object({
-  value: z.string(),
+  value: z.string().min(1),
   modifierTypeId: z.number(),
 })
 
