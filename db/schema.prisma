@@ -80,16 +80,14 @@ model Location {
 model Product {
   id          Int      @id @default(autoincrement())
   name        String
-  sku         String?  @unique
   image       String?
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
-  variants              ProductVariant[]
-  modifierType          ProductModifierType? @relation()
-  productModifierTypeId Int?
+  variants         ProductVariant[]
+  productModifiers ProductModifierType[]
 }
 
 /// ModifierType defines *what kind* of modifier (e.g., Color, Size)
@@ -97,7 +95,7 @@ model ProductModifierType {
   id        Int      @id @default(autoincrement())
   name      String // e.g. "Color"
   product   Product  @relation(fields: [productId], references: [id])
-  productId Int      @unique
+  productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -127,10 +125,9 @@ model ProductVariant {
   updatedAt DateTime @updatedAt
 
   // Relations
-  stockLevels            StockLevel[]
-  movements              Movement[]
-  modifierValue          ProductModifierValue @relation(fields: [productModifierValueId], references: [id])
-  productModifierValueId Int
+  stockLevels    StockLevel[]
+  movements      Movement[]
+  modifierValues ProductModifierValue[]
 }
 
 model Movement {

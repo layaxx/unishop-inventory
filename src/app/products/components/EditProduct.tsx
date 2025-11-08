@@ -30,7 +30,12 @@ export const EditProduct = ({ productId }: { productId: number }) => {
           <ProductForm
             submitText="Update Product"
             schema={UpdateProductSchema}
-            initialValues={product}
+            initialValues={{
+              id: product.id,
+              name: product.name,
+              description: product.description ?? "",
+              image: product.image ?? "",
+            }}
             onSubmit={async (values) => {
               try {
                 const updated = await updateProductMutation({

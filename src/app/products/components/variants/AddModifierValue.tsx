@@ -7,6 +7,7 @@ import createProductModifierValueMutation from "../../mutations/createProductMod
 import { CreateProductModifierValueSchema } from "../../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import getProductModifierType from "../../queries/getProductModifierType"
+import getProductModifierTypes from "../../queries/getProductModifierTypes"
 
 const AddModifier: React.FC<{ modifierTypeId: number }> = ({ modifierTypeId }) => {
   const [showForm, setShowForm] = React.useState(false)
@@ -25,7 +26,7 @@ const AddModifier: React.FC<{ modifierTypeId: number }> = ({ modifierTypeId }) =
           onSubmit={async (values) => {
             try {
               await createProductModifierValue(values)
-              invalidateQuery(getProductModifierType)
+              invalidateQuery(getProductModifierTypes)
             } catch (error: any) {
               console.error(error)
               return {

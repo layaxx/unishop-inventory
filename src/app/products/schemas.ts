@@ -2,7 +2,6 @@ import { z } from "zod"
 
 export const CreateProductSchema = z.object({
   name: z.string(),
-  sku: z.string().optional(),
   image: z.string().optional(),
   description: z.string().optional(),
   productModifierTypeId: z.number().optional(),

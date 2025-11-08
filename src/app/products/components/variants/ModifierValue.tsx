@@ -7,6 +7,7 @@ import React from "react"
 import { UpdateProductModifierValueSchema } from "../../schemas"
 import getProductModifierType from "../../queries/getProductModifierType"
 import deleteProductModifierValueMutation from "../../mutations/deleteProductModifierValue"
+import getProductModifierTypes from "../../queries/getProductModifierTypes"
 
 const ModifierValue: React.FC<{ value: ProductModifierValue; type: ProductModifierType }> = ({
   value,
@@ -23,7 +24,7 @@ const ModifierValue: React.FC<{ value: ProductModifierValue; type: ProductModifi
       }
 
       await deleteProductModifierValue({ id: value.id })
-      invalidateQuery(getProductModifierType)
+      invalidateQuery(getProductModifierTypes)
     } catch (error) {
       console.error("Failed to delete modifier value:", error)
     }
@@ -39,7 +40,7 @@ const ModifierValue: React.FC<{ value: ProductModifierValue; type: ProductModifi
         onSubmit={async (values) => {
           try {
             await updateProductModifierValue(values)
-            invalidateQuery(getProductModifierType)
+            invalidateQuery(getProductModifierTypes)
           } catch (error: any) {
             console.error(error)
             return {

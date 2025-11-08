@@ -2,6 +2,8 @@ import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { DeleteProductModifierValueSchema } from "../schemas"
 
+// TODO: dont remove for last value of type
+
 export default resolver.pipe(
   resolver.zod(DeleteProductModifierValueSchema),
   resolver.authorize(),
@@ -14,7 +16,7 @@ export default resolver.pipe(
     }
 
     const stockLevels = await db.stockLevel.findMany({
-      where: { variant: { productModifierValueId: id } },
+      where: { variant: { modifierValues: { some: { id } } } },
       select: { quantity: true },
     })
 
@@ -24,7 +26,7 @@ export default resolver.pipe(
       throw new Error("Cannot delete modifier value with existing stock levels")
     }
 
-    await db.productVariant.deleteMany({ where: { productModifierValueId: id } })
+    await db.productVariant.deleteMany({ where: { modifierValues: { some: { id } } } })
 
     const value = await db.productModifierValue.deleteMany({ where: { id } })
 

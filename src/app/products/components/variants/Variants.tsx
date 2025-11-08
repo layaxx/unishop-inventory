@@ -1,37 +1,40 @@
 import { useQuery } from "@blitzjs/rpc"
-import getProductVariants from "../../queries/getProductVariants"
 import { FC } from "react"
 import AddModifier from "./AddModifier"
-import getProductModifierType from "../../queries/getProductModifierType"
 import AddModifierValue from "./AddModifierValue"
 import ModifierValue from "./ModifierValue"
 import { VariantTable } from "./VariantTable"
 import { columns } from "./VariantColumn"
+import getProductModifierTypes from "../../queries/getProductModifierTypes"
+import React from "react"
 
 const Variants: FC<{ productId: number }> = ({ productId }) => {
-  const [type, { isLoading }] = useQuery(getProductModifierType, {
+  const [types, { isLoading }] = useQuery(getProductModifierTypes, {
     productId,
   })
+
+  console.log(types)
 
   if (isLoading) {
     return <div>Loading variants...</div>
   }
 
-  if (!type) {
-    return <AddModifier productId={productId} />
-  }
-
   return (
     <>
-      <h3>{type.name}</h3>
-      <div>
-        {type.values?.map((value) => (
-          <ModifierValue value={value} type={type} key={value.id} />
-        ))}
-        <AddModifierValue modifierTypeId={type.id} />
+      {types?.map((type) => (
+        <React.Fragment key={type.id}>
+          <h3 className="mt-2 font-bold text-3xl">{type.name}</h3>
+          <div>
+            {type.values?.map((value) => (
+              <ModifierValue value={value} type={type} key={value.id} />
+            ))}
+            <AddModifierValue modifierTypeId={type.id} />
+          </div>
+        </React.Fragment>
+      ))}
 
-        <VariantTable columns={columns} data={[]} />
-      </div>
+      <AddModifier productId={productId} />
+      <VariantTable columns={columns} data={[]} />
     </>
   )
 }

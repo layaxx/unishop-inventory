@@ -23,7 +23,7 @@ export default resolver.pipe(
           where,
           orderBy,
           include: {
-            modifierValue: { include: { modifierType: true } },
+            modifierValues: { include: { modifierType: true } },
 
             stockLevels: true,
           },

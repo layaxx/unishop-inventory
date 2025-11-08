@@ -7,6 +7,7 @@ import createProductModifierTypeMutation from "../../mutations/createProductModi
 import { CreateProductModifierTypeSchema } from "../../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import getProductModifierType from "../../queries/getProductModifierType"
+import getProductModifierTypes from "../../queries/getProductModifierTypes"
 
 const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
   const [showForm, setShowForm] = React.useState(false)
@@ -16,8 +17,7 @@ const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
   const router = useRouter()
 
   return (
-    <div>
-      <h3>No Variants Found</h3>
+    <div className="mt-4">
       {showForm ? (
         <Form
           submitText="Create ModifierType"
@@ -26,7 +26,7 @@ const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
           onSubmit={async (values) => {
             try {
               await createProductModifierType(values)
-              invalidateQuery(getProductModifierType)
+              invalidateQuery(getProductModifierTypes)
             } catch (error: any) {
               console.error(error)
               return {

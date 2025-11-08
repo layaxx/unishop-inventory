@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import deleteProduct from "../mutations/deleteProduct"
 import getProduct from "../queries/getProduct"
 import Variants from "./variants/Variants"
+import getProductVariants from "../queries/getProductVariants"
 
 export const Product = ({ productId }: { productId: number }) => {
   console.log("Product component rendered with productId:", productId, typeof productId)
@@ -12,12 +13,21 @@ export const Product = ({ productId }: { productId: number }) => {
   const [deleteProductMutation] = useMutation(deleteProduct)
   const [product] = useQuery(getProduct, { id: productId })
 
-  if (!product) return
+  const [variants] = useQuery(getProductVariants, { where: { productId } })
+  console.log(
+    "Fetched variants:",
+    variants?.productVariants.map((var_) => ({
+      id: var_.id,
+      modifierValues: var_.modifierValues.map((mv) => mv.value).join(", "),
+    }))
+  )
+
+  if (!product) return <></>
 
   return (
     <>
       <div>
-        <h1>{product.name}</h1>
+        <h1 className="text-5xl font-bold">{product.name}</h1>
         <p>Product {product.id}</p>
         <p>{product.description}</p>
 
@@ -38,7 +48,7 @@ export const Product = ({ productId }: { productId: number }) => {
           Delete
         </button>
 
-        <h2>Variants</h2>
+        <h2 className="font-bold text-4xl">Variants</h2>
         <Variants productId={product.id} />
       </div>
     </>

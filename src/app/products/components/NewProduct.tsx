@@ -12,7 +12,7 @@ export function New__ModelName() {
     <ProductForm
       submitText="Create Product"
       schema={CreateProductSchema}
-      initialValues={{ name: "", sku: "", image: "", description: "" }}
+      initialValues={{ name: "", image: "", description: "" }}
       onSubmit={async (values) => {
         try {
           const product = await createProductMutation(values)
