@@ -34,3 +34,7 @@ export const UpdateProductModifierValueSchema = z.object({
 export const DeleteProductModifierValueSchema = z.object({
   id: z.number(),
 })
+
+export const DeleteProductModifierTypeSchema = z.object({
+  id: z.number(),
+})

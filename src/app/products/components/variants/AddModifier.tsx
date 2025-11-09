@@ -1,20 +1,17 @@
 "use client"
 import Form, { FORM_ERROR } from "@/src/app/components/Form"
 import LabeledTextField from "@/src/app/components/LabeledTextField"
-import { useRouter } from "next/navigation"
 import React from "react"
 import createProductModifierTypeMutation from "../../mutations/createProductModifierType"
 import { CreateProductModifierTypeSchema } from "../../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
-import getProductModifierType from "../../queries/getProductModifierType"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
+import { Button } from "@/components/ui/button"
 
 const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
   const [showForm, setShowForm] = React.useState(false)
 
   const [createProductModifierType] = useMutation(createProductModifierTypeMutation)
-
-  const router = useRouter()
 
   return (
     <div className="mt-4">
@@ -38,7 +35,9 @@ const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
           <LabeledTextField name="name" label="Name" placeholder="Name" />
         </Form>
       ) : (
-        <button onClick={() => setShowForm(true)}>Add Modifier</button>
+        <Button onClick={() => setShowForm(true)} size="sm" variant="outline">
+          Add Modifier Type
+        </Button>
       )}
     </div>
   )

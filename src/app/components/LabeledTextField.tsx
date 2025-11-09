@@ -1,7 +1,10 @@
 import { forwardRef, PropsWithoutRef } from "react"
 import { useField, useFormikContext, ErrorMessage } from "formik"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
-export interface LabeledTextFieldProps extends PropsWithoutRef<React.JSX.IntrinsicElements["input"]> {
+export interface LabeledTextFieldProps
+  extends PropsWithoutRef<React.JSX.IntrinsicElements["input"]> {
   /** Field name. */
   name: string
   /** Field label. */
@@ -18,10 +21,10 @@ export const LabeledTextField = forwardRef<HTMLInputElement, LabeledTextFieldPro
 
     return (
       <div {...outerProps}>
-        <label>
+        <Label>
           {label}
-          <input {...input} disabled={isSubmitting} {...props} ref={ref} />
-        </label>
+          <Input {...input} disabled={isSubmitting} {...props} ref={ref} />
+        </Label>
 
         <ErrorMessage name={name}>
           {(msg) => (
@@ -30,23 +33,6 @@ export const LabeledTextField = forwardRef<HTMLInputElement, LabeledTextFieldPro
             </div>
           )}
         </ErrorMessage>
-
-        <style jsx>{`
-          label {
-            display: flex;
-            flex-direction: column;
-            align-items: start;
-            font-size: 1rem;
-          }
-          input {
-            font-size: 1rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 3px;
-            border: 1px solid purple;
-            appearance: none;
-            margin-top: 0.5rem;
-          }
-        `}</style>
       </div>
     )
   }

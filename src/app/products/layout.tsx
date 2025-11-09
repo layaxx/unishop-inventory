@@ -5,5 +5,5 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   await useAuthenticatedBlitzContext({
     redirectTo: "/login",
   })
-  return SidebarLayout({ children, breadcrumbs: { page: "Products", pre: [] } })
+  return SidebarLayout({ children })
 }

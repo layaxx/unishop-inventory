@@ -1,5 +1,4 @@
 import { Metadata } from "next"
-import Link from "next/link"
 import { Suspense } from "react"
 import { invoke } from "src/app/blitz-server"
 import getProduct from "../queries/getProduct"
@@ -21,9 +20,6 @@ export default async function Page(props: ProductPageProps) {
   const params = await props.params
   return (
     <div>
-      <p>
-        <Link href={"/products"}>Products</Link>
-      </p>
       <Suspense fallback={<div>Loading...</div>}>
         <Product productId={Number(params.productId)} />
       </Suspense>
