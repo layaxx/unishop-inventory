@@ -1,6 +1,6 @@
 "use client"
 
-import { Shirt } from "lucide-react"
+import { Shirt, Warehouse } from "lucide-react"
 
 import { NavMain } from "./NavMain"
 import { NavUser } from "./NavUser"
@@ -14,9 +14,11 @@ import {
 } from "@/components/ui/sidebar"
 import { useQuery } from "@blitzjs/rpc"
 import getProducts from "../../products/queries/getProducts"
+import getLocations from "../../locations/queries/getLocations"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [products] = useQuery(getProducts, { take: 5 })
+  const [locations] = useQuery(getLocations, { take: 10 })
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -28,7 +30,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           items={[
             {
               title: "Products",
-              url: "#",
+              url: "/products",
               icon: Shirt,
               isActive: true,
               items: [
@@ -37,6 +39,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   url: `/products/${product.id}`,
                 })) ?? []),
                 { title: "all products...", url: "/products" },
+              ],
+            },
+            {
+              title: "Locations",
+              url: "/locations",
+              icon: Warehouse,
+              isActive: true,
+              items: [
+                ...(locations?.locations.map((location) => ({
+                  title: location.name,
+                  url: `/locations/${location.id}`,
+                })) ?? []),
+                { title: "all locations...", url: "/locations" },
               ],
             },
           ]}

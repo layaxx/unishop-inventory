@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@radix-ui/react-separator"
-import { FC, PropsWithChildren } from "react"
+import { FC, Fragment, PropsWithChildren } from "react"
 
 const Breadcrumbs: FC<
   PropsWithChildren<{ page: string; pre: Array<{ name: string; url: string }> }>
@@ -21,12 +21,12 @@ const Breadcrumbs: FC<
         <Breadcrumb>
           <BreadcrumbList>
             {pre.map((crumb) => (
-              <>
+              <Fragment key={crumb.url}>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href={crumb.url}>{crumb.name}</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
-              </>
+              </Fragment>
             ))}
             <BreadcrumbItem>
               <BreadcrumbPage>{page}</BreadcrumbPage>

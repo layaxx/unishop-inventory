@@ -1,8 +1,7 @@
 import { useQuery } from "@blitzjs/rpc"
 import { FC } from "react"
 import getProductVariants from "../../queries/getProductVariants"
-import { VariantTable } from "./VariantTable"
-import { columns } from "./VariantColumn"
+import { DataTable } from "../../../components/DataTable"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
 
 const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
@@ -10,45 +9,48 @@ const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
   const [variants] = useQuery(getProductVariants, { where: { productId } })
 
   return (
-    <VariantTable
-      data={
-        variants?.productVariants.map((x) => {
-          const obj: Record<string, string | number> = {
-            totalStock: x.stockLevels.reduce((acc, level) => acc + level.quantity, 0),
-          }
+    <div className="mt-4">
+      <h2 className="font-bold text-4xl">Variants</h2>
+      <DataTable
+        data={
+          variants?.productVariants.map((x) => {
+            const obj: Record<string, string | number> = {
+              totalStock: x.stockLevels.reduce((acc, level) => acc + level.quantity, 0),
+            }
 
-          for (const type of types ?? []) {
-            const value = x.modifierValues.find((mv) => mv.modifierTypeId === type.id)?.value
+            for (const type of types ?? []) {
+              const value = x.modifierValues.find((mv) => mv.modifierTypeId === type.id)?.value
 
-            obj["mod" + type.id] = value || "(Default)"
-          }
+              obj["mod" + type.id] = value || "(Default)"
+            }
 
-          if (types?.length === 0) {
-            obj["x"] = "(Default)"
-          }
+            if (types?.length === 0) {
+              obj["x"] = "(Default)"
+            }
 
-          return obj
-        }) ?? []
-      }
-      columns={[
-        ...((types ?? []).map((type) => ({
-          accessorKey: "mod" + type.id,
-          header: type.name,
-        })) as any),
-        ...(types?.length === 0
-          ? [
-              {
-                accessorKey: "x",
-                header: "Name",
-              },
-            ]
-          : []),
-        {
-          accessorKey: "totalStock",
-          header: "Stock (total)",
-        },
-      ]}
-    />
+            return obj
+          }) ?? []
+        }
+        columns={[
+          ...((types ?? []).map((type) => ({
+            accessorKey: "mod" + type.id,
+            header: type.name,
+          })) as any),
+          ...(types?.length === 0
+            ? [
+                {
+                  accessorKey: "x",
+                  header: "Name",
+                },
+              ]
+            : []),
+          {
+            accessorKey: "totalStock",
+            header: "Stock (total)",
+          },
+        ]}
+      />
+    </div>
   )
 }
 

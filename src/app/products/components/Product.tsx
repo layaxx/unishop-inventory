@@ -38,7 +38,6 @@ export const Product = ({ productId }: { productId: number }) => {
           Delete
         </button>
 
-        <h2 className="font-bold text-4xl">Variants</h2>
         <Modifiers productId={product.id} />
         <VariantOverview productId={product.id} />
       </div>

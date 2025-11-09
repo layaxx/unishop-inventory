@@ -6,6 +6,9 @@ import getLocations from "../queries/getLocations"
 import { useSearchParams } from "next/navigation"
 import { usePathname } from "next/navigation"
 import { Route } from "next"
+import { ButtonGroup } from "@/components/ui/button-group"
+import { Button } from "@/components/ui/button"
+import { DataTable } from "../../components/DataTable"
 
 const ITEMS_PER_PAGE = 100
 
@@ -36,20 +39,30 @@ export const LocationsList = () => {
 
   return (
     <div>
-      <ul>
-        {locations.map((location) => (
-          <li key={location.id}>
-            <Link href={`/locations/${location.id}`}>{location.name}</Link>
-          </li>
-        ))}
-      </ul>
+      <DataTable
+        columns={[
+          { accessorKey: "id", header: "ID" },
+          {
+            accessorKey: "name",
+            header: "Name",
+            cell: ({ row }) => (
+              <Link className="underline" href={`/locations/${row.original.id}`}>
+                {row.original.name}
+              </Link>
+            ),
+          },
+        ]}
+        data={locations}
+      />
 
-      <button disabled={page === 0} onClick={goToPreviousPage}>
-        Previous
-      </button>
-      <button disabled={!hasMore} onClick={goToNextPage}>
-        Next
-      </button>
+      <ButtonGroup>
+        <Button disabled={page === 0} onClick={goToPreviousPage} variant="outline">
+          Previous
+        </Button>
+        <Button disabled={!hasMore} onClick={goToNextPage} variant="outline">
+          Next
+        </Button>
+      </ButtonGroup>
     </div>
   )
 }

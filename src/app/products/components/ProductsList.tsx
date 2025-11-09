@@ -6,6 +6,9 @@ import getProducts from "../queries/getProducts"
 import { useSearchParams } from "next/navigation"
 import { usePathname } from "next/navigation"
 import { Route } from "next"
+import { Button } from "@/components/ui/button"
+import { DataTable } from "../../components/DataTable"
+import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
 
 const ITEMS_PER_PAGE = 100
 
@@ -29,7 +32,7 @@ export const ProductsList = () => {
     take: ITEMS_PER_PAGE,
   })
 
-  const { products, hasMore } = res ?? { locations: [], hasMore: false }
+  const { products, hasMore } = res ?? { products: [], hasMore: false }
   const router = useRouter()
   const pathname = usePathname()
 
@@ -46,22 +49,40 @@ export const ProductsList = () => {
 
   return (
     <div>
-      <ul>
-        {products?.map((product) => (
-          <li key={product.id}>
-            <Link href={`/products/${product.id}`}>
-              {product.name} ({product.variants.length} Variants) [{getStockCount(product)} items]
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <DataTable
+        data={products.map((prod) => ({
+          ...prod,
+          totalStock: getStockCount(prod),
+        }))}
+        columns={[
+          { accessorKey: "id", header: "ID" },
+          {
+            accessorKey: "name",
+            header: "Name",
+            cell: ({ row }) => (
+              <Link href={`/products/${row.original.id}`} className="underline">
+                {row.original.name}
+              </Link>
+            ),
+          },
+          {
+            header: "Number of Variants",
+            accessorKey: "variants",
+            cell: ({ row }) => row.original.variants.length,
+          },
+          { accessorKey: "totalStock", header: "Total Stock" },
+        ]}
+      />
 
-      <button disabled={page === 0} onClick={goToPreviousPage}>
-        Previous
-      </button>
-      <button disabled={!hasMore} onClick={goToNextPage}>
-        Next
-      </button>
+      <ButtonGroup>
+        <Button disabled={page === 0} onClick={goToPreviousPage} variant="outline">
+          Previous
+        </Button>
+        <ButtonGroupSeparator />
+        <Button disabled={!hasMore} onClick={goToNextPage} variant="outline">
+          Next
+        </Button>
+      </ButtonGroup>
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { CreateProductModifierValueSchema } from "../../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
 import { Button } from "@/components/ui/button"
+import getProductVariants from "../../queries/getProductVariants"
 
 const AddModifier: React.FC<{ modifierTypeId: number }> = ({ modifierTypeId }) => {
   const [showForm, setShowForm] = React.useState(false)
@@ -24,6 +25,7 @@ const AddModifier: React.FC<{ modifierTypeId: number }> = ({ modifierTypeId }) =
             try {
               await createProductModifierValue(values)
               invalidateQuery(getProductModifierTypes)
+              invalidateQuery(getProductVariants)
             } catch (error: any) {
               console.error(error)
               return {

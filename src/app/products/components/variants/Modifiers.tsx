@@ -15,15 +15,7 @@ import {
 import { Button } from "@/components/ui/button"
 import deleteProductModifierValueMutation from "../../mutations/deleteProductModifierValue"
 import deleteProductModifierTypeMutation from "../../mutations/deleteProductModifierType"
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const Modifiers: FC<{ productId: number }> = ({ productId }) => {
   const [types, { isLoading }] = useQuery(getProductModifierTypes, {
@@ -65,6 +57,7 @@ const Modifiers: FC<{ productId: number }> = ({ productId }) => {
 
   return (
     <>
+      <h2 className="font-bold text-4xl">Modifiers</h2>
       <AddModifier productId={productId} />
 
       <div className="flex flex-wrap space-x-4">

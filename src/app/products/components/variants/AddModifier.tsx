@@ -24,6 +24,7 @@ const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
             try {
               await createProductModifierType(values)
               invalidateQuery(getProductModifierTypes)
+              setShowForm(false)
             } catch (error: any) {
               console.error(error)
               return {
