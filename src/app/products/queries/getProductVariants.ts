@@ -3,11 +3,14 @@ import { resolver } from "@blitzjs/rpc"
 import db, { Prisma } from "db"
 
 interface GetProductVariantsInput
-  extends Pick<Prisma.ProductVariantFindManyArgs, "where" | "orderBy" | "skip" | "take"> {}
+  extends Pick<
+    Prisma.ProductVariantFindManyArgs,
+    "where" | "orderBy" | "skip" | "take" | "include"
+  > {}
 
 export default resolver.pipe(
   resolver.authorize(),
-  async ({ where, orderBy, skip = 0, take = 100 }: GetProductVariantsInput) => {
+  async ({ where, orderBy, skip = 0, take = 100, include }: GetProductVariantsInput) => {
     const {
       items: productVariants,
       hasMore,
@@ -22,11 +25,7 @@ export default resolver.pipe(
           ...paginateArgs,
           where,
           orderBy,
-          include: {
-            modifierValues: { include: { modifierType: true } },
-
-            stockLevels: true,
-          },
+          include,
         }),
     })
 

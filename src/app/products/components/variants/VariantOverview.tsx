@@ -6,7 +6,10 @@ import getProductModifierTypes from "../../queries/getProductModifierTypes"
 
 const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
   const [types] = useQuery(getProductModifierTypes, { productId })
-  const [variants] = useQuery(getProductVariants, { where: { productId } })
+  const [variants] = useQuery(getProductVariants, {
+    where: { productId },
+    include: { modifierValues: true, stockLevels: true },
+  })
 
   return (
     <div className="mt-4">
