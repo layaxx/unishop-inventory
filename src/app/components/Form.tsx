@@ -1,5 +1,5 @@
 import { useState, ReactNode, PropsWithoutRef } from "react"
-import { Formik, FormikProps } from "formik"
+import { Formik, FormikHelpers, FormikProps } from "formik"
 import { validateZodSchema } from "blitz"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
@@ -12,7 +12,10 @@ export interface FormProps<S extends z.ZodType<any, any>>
   submitText?: string
   resetText?: string
   schema?: S
-  onSubmit: (values: z.infer<S>) => Promise<void | OnSubmitResult>
+  onSubmit: (
+    values: z.infer<S>,
+    actions: FormikHelpers<z.infer<S>>
+  ) => Promise<void | OnSubmitResult>
   initialValues?: FormikProps<z.infer<S>>["initialValues"]
   innerRef?: React.Ref<any>
 }
@@ -40,15 +43,15 @@ export function Form<S extends z.ZodType<any, any>>({
       initialValues={initialValues || {}}
       validate={validateZodSchema(schema)}
       innerRef={innerRef}
-      onSubmit={async (values, { setErrors }) => {
-        const { FORM_ERROR, ...otherErrors } = (await onSubmit(values)) || {}
+      onSubmit={async (values, actions) => {
+        const { FORM_ERROR, ...otherErrors } = (await onSubmit(values, actions)) || {}
 
         if (FORM_ERROR) {
           setFormError(FORM_ERROR)
         }
 
         if (Object.keys(otherErrors).length > 0) {
-          setErrors(otherErrors)
+          actions.setErrors(otherErrors)
         }
       }}
     >

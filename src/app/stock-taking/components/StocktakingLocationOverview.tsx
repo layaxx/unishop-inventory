@@ -19,26 +19,30 @@ const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId })
     <div>
       <h1 className="text-5xl font-bold mb-4">Stocktaking for {location?.name}</h1>
       <NewStocktakingEntry locationId={locationId} innerRef={formRef} />
-      <div className="mt-4">
-        <DataTable
-          data={inventoryEntries ?? []}
-          columns={[
-            { accessorKey: "id", header: "ID" },
-            { accessorKey: "location.name", header: "Location" },
-            { accessorFn: (original) => getName(original.variant), header: "Variant ID" },
-            {
-              accessorKey: "quantity",
-              header: () => <div className="text-right">Quantity</div>,
-              cell({ row }) {
-                return <div className="text-right">{row.getValue("quantity")}</div>
+      <div className="flex flex-wrap gap-4 mt-4">
+        <div className="w-full md:w-6/12">
+          <h2 className="mb-2 font-bold text-4xl">Tracked variants</h2>
+          <DataTable
+            data={inventoryEntries ?? []}
+            columns={[
+              { accessorKey: "id", header: "ID" },
+              { accessorKey: "location.name", header: "Location" },
+              { accessorFn: (original) => getName(original.variant), header: "Variant ID" },
+              {
+                accessorKey: "quantity",
+                header: () => <div className="text-right">Quantity</div>,
+                cell({ row }) {
+                  return <div className="text-right">{row.getValue("quantity")}</div>
+                },
               },
-            },
-            { accessorKey: "description", header: "Description" },
-          ]}
-        />
+              { accessorKey: "description", header: "Description" },
+            ]}
+          />
+        </div>
+        <div className="w-full md:w-3/12">
+          <UntrackedVariants locationId={locationId} formRef={formRef} />
+        </div>
       </div>
-
-      <UntrackedVariants locationId={locationId} formRef={formRef} />
     </div>
   )
 }

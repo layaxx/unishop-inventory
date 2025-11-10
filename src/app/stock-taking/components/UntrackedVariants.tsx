@@ -13,7 +13,7 @@ const UntrackedVariants: FC<{
 
   return (
     <>
-      <h2 className="mt-4 mb-2 font-bold text-4xl">Untracked Variants</h2>
+      <h2 className="mb-2 font-bold text-4xl">Untracked Variants</h2>
       <DataTable
         data={result ?? []}
         columns={[

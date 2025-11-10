@@ -46,13 +46,13 @@ const VariantSelector: FC<{ name: string; label: string }> = ({ name }) => {
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[200px] justify-between"
+            className="min-w-80 w-full justify-between"
           >
             {activeVariantName ?? "Select product variant..."}
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
+        <PopoverContent className="min-w-80 w-full p-0">
           <Command>
             <CommandInput placeholder="Search variants..." className="h-9" />
             <CommandList>

@@ -22,12 +22,14 @@ const NewStocktakingEntry: FC<{ locationId: number; innerRef: React.Ref<any> }> 
       submitText="Create Stocktaking Entry"
       initialValues={{ quantity: 0, locationId, variantId: -1, description: "" }}
       schema={CreateInventoryEntrySchema}
-      onSubmit={async (values) => {
+      onSubmit={async (values, actions) => {
         try {
           await createInventoryEntry(values)
           invalidateQuery(getInventoryEntries)
           invalidateQuery(getUntrackedVariants)
           invalidateQuery(isActiveInventory)
+          actions.resetForm()
+          return {}
         } catch (error: any) {
           console.error(error)
           return {
