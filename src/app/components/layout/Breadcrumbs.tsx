@@ -8,12 +8,13 @@ import {
 } from "@/components/ui/breadcrumb"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@radix-ui/react-separator"
+import { Plus } from "lucide-react"
 import Link from "next/link"
 import { FC, Fragment, PropsWithChildren } from "react"
 
 const Breadcrumbs: FC<
-  PropsWithChildren<{ page: string; pre: Array<{ name: string; url: string }> }>
-> = ({ children, page, pre }) => (
+  PropsWithChildren<{ page: string; pre: Array<{ name: string; url: string }>; createNew?: string }>
+> = ({ children, page, pre, createNew }) => (
   <>
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4">
@@ -34,6 +35,16 @@ const Breadcrumbs: FC<
             <BreadcrumbItem>
               <BreadcrumbPage>{page}</BreadcrumbPage>
             </BreadcrumbItem>
+
+            {createNew && (
+              <BreadcrumbItem>
+                <BreadcrumbLink>
+                  <Link href={createNew}>
+                    <Plus />
+                  </Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+            )}
           </BreadcrumbList>
         </Breadcrumb>
       </div>

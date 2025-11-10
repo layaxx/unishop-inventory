@@ -9,9 +9,14 @@ export { FORM_ERROR } from "src/app/components/Form"
 export function ProductForm<S extends z.ZodType<any, any>>(props: FormProps<S>) {
   return (
     <Form<S> {...props}>
-      <LabeledTextField name="name" label="Name" placeholder="Name" />
-      <LabeledTextField name="description" label="Description" placeholder="Description" />
-      <FileUpload name="image" label="Image" />
+      <LabeledTextField name="name" label="Name" placeholder="Name" className="mb-2" />
+      <LabeledTextField
+        name="description"
+        label="Description"
+        placeholder="Description"
+        className="mb-2"
+      />
+      <FileUpload name="image" label="Image" className="mb-4" />
     </Form>
   )
 }

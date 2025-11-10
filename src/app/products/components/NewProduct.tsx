@@ -1,11 +1,12 @@
 "use client"
 import { FORM_ERROR, ProductForm } from "./ProductForm"
 import { CreateProductSchema } from "../schemas"
-import { useMutation } from "@blitzjs/rpc"
+import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import { useRouter } from "next/navigation"
 import createProduct from "../mutations/createProduct"
+import getProducts from "../queries/getProducts"
 
-export function New__ModelName() {
+export function NewProduct() {
   const [createProductMutation] = useMutation(createProduct)
   const router = useRouter()
   return (
@@ -16,6 +17,7 @@ export function New__ModelName() {
       onSubmit={async (values) => {
         try {
           const product = await createProductMutation(values)
+          invalidateQuery(getProducts)
           router.push(`/products/${product.id}`)
         } catch (error: any) {
           console.error(error)
