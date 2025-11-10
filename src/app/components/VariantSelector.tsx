@@ -16,13 +16,7 @@ import { ErrorMessage, useField, useFormikContext } from "formik"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { FC, useState } from "react"
 import getProductVariants from "../products/queries/getProductVariants"
-import { ProductModifierValue } from "@prisma/client"
-
-function getName(variant: any) {
-  return `${variant.product.name} (${variant.modifierValues
-    .map((mv: ProductModifierValue) => mv.value)
-    .join(", ")})`
-}
+import { getName } from "@/src/lib/variant"
 
 const VariantSelector: FC<{ name: string; label: string }> = ({ name }) => {
   const [input] = useField(name)

@@ -14,6 +14,7 @@ export interface FormProps<S extends z.ZodType<any, any>>
   schema?: S
   onSubmit: (values: z.infer<S>) => Promise<void | OnSubmitResult>
   initialValues?: FormikProps<z.infer<S>>["initialValues"]
+  innerRef?: React.Ref<any>
 }
 
 interface OnSubmitResult {
@@ -30,6 +31,7 @@ export function Form<S extends z.ZodType<any, any>>({
   schema,
   initialValues,
   onSubmit,
+  innerRef,
   ...props
 }: FormProps<S>) {
   const [formError, setFormError] = useState<string | null>(null)
@@ -37,6 +39,7 @@ export function Form<S extends z.ZodType<any, any>>({
     <Formik
       initialValues={initialValues || {}}
       validate={validateZodSchema(schema)}
+      innerRef={innerRef}
       onSubmit={async (values, { setErrors }) => {
         const { FORM_ERROR, ...otherErrors } = (await onSubmit(values)) || {}
 

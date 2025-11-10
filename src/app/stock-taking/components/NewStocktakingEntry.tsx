@@ -6,19 +6,28 @@ import { CreateInventoryEntrySchema } from "../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import createInventoryEntryMutation from "../mutations/createInventoryEntry"
 import getInventoryEntries from "../queries/getInventoryEntries"
+import { FC } from "react"
+import getUntrackedVariants from "../queries/getUntrackedVariants"
+import isActiveInventory from "../queries/isActiveInventory"
 
-const NewStocktakingEntry = () => {
+const NewStocktakingEntry: FC<{ locationId: number; innerRef: React.Ref<any> }> = ({
+  locationId,
+  innerRef,
+}) => {
   const [createInventoryEntry] = useMutation(createInventoryEntryMutation)
 
   return (
     <Form
+      innerRef={innerRef}
       submitText="Create Stocktaking Entry"
-      initialValues={{ quantity: 0, locationId: -1, variantId: -1, description: "" }}
+      initialValues={{ quantity: 0, locationId, variantId: -1, description: "" }}
       schema={CreateInventoryEntrySchema}
       onSubmit={async (values) => {
         try {
           await createInventoryEntry(values)
           invalidateQuery(getInventoryEntries)
+          invalidateQuery(getUntrackedVariants)
+          invalidateQuery(isActiveInventory)
         } catch (error: any) {
           console.error(error)
           return {
@@ -29,13 +38,8 @@ const NewStocktakingEntry = () => {
     >
       <div className="flex flex-wrap space-x-4 mb-4">
         <div>
-          <LocationSelector name="locationId" label="Location" />
-        </div>
-        <div>
           <VariantSelector name="variantId" label="Variant" />
         </div>
-      </div>
-      <div className="flex flex-wrap space-x-4">
         <div>
           <LabeledTextField name="quantity" label="Quantity" type="number" />
         </div>
