@@ -1,6 +1,7 @@
 import { resolver } from "@blitzjs/rpc"
 import db, { MovementType } from "db"
 import { FinalizeStocktakingInput } from "../schemas"
+import buildPDF from "./buildPDF"
 
 export default resolver.pipe(
   resolver.zod(FinalizeStocktakingInput),
@@ -30,7 +31,7 @@ export default resolver.pipe(
     }
 
     // update stockLevels for all tracked variants
-    await db.$transaction(async (tx) => {
+    const auditId = await db.$transaction(async (tx) => {
       const groups = await tx.inventoryEntry.groupBy({
         by: ["variantId"],
         where: { locationId },
@@ -38,8 +39,10 @@ export default resolver.pipe(
       })
 
       const updatePromises = groups.map(async (group) => {
-        if (!group._sum.quantity) {
-          throw new Error("Invariant violation: quantity sum is null")
+        if (group._sum.quantity === undefined || group._sum.quantity === null) {
+          throw new Error(
+            `Invariant violation: quantity sum is null (variantId: ${group.variantId})`
+          )
         }
 
         const previousStockLevel = await tx.stockLevel.findFirst({
@@ -88,14 +91,26 @@ export default resolver.pipe(
 
       // remove all inventoryEvents for the location
       await tx.inventoryEntry.deleteMany({ where: { locationId } })
-      await tx.auditLogStocktaking.create({
-        data: {
-          locationId,
-          userId: ctx.session.userId,
-          success: true,
-        },
-      })
+      return (
+        await tx.auditLogStocktaking.create({
+          data: {
+            locationId,
+            userId: ctx.session.userId,
+            success: true,
+          },
+        })
+      ).id
     })
+
+    try {
+      const pdf = await buildPDF({ locationId }, ctx)
+      await db.auditLogStocktaking.update({
+        where: { id: auditId },
+        data: { pdfReport: pdf },
+      })
+    } catch (e) {
+      console.error("Failed to build stocktaking PDF:", e)
+    }
 
     return true
   }

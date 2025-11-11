@@ -9,6 +9,8 @@ import { getName } from "@/src/lib/variant"
 import { FC, useRef } from "react"
 import getLocation from "../../locations/queries/getLocation"
 import FinalizeStocktaking from "./FinalizeStocktaking"
+import { Button } from "@/components/ui/button"
+import { ErrorBoundary } from "@blitzjs/next"
 
 const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId }) => {
   const [inventoryEntries] = useQuery(getInventoryEntries, { where: { locationId } })
@@ -45,7 +47,18 @@ const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId })
         </div>
       </div>
 
-      <FinalizeStocktaking locationId={locationId} />
+      <ErrorBoundary
+        FallbackComponent={({ error, resetErrorBoundary }) => {
+          return (
+            <>
+              <p>Finalizing the process has failed: {error.message}</p>
+              <Button onClick={resetErrorBoundary}>Reset</Button>
+            </>
+          )
+        }}
+      >
+        <FinalizeStocktaking locationId={locationId} />
+      </ErrorBoundary>
     </div>
   )
 }

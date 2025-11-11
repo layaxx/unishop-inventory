@@ -23,7 +23,11 @@ const FinalizeStocktaking: FC<{ locationId: number }> = ({ locationId }) => {
         className="w-full"
         disabled={hasUntrackedVariants}
         onClick={async () => {
-          await finalize({ locationId })
+          try {
+            await finalize({ locationId })
+          } catch (error) {
+            console.warn(error)
+          }
         }}
       >
         Finalize Stocktaking for {location?.name}

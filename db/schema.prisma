@@ -188,5 +188,6 @@ model AuditLogStocktaking {
   user       User     @relation(fields: [userId], references: [id])
   userId     Int
   success    Boolean
+  pdfReport  Bytes?
   createdAt  DateTime @default(now())
 }

@@ -1,6 +1,16 @@
 import db from "@/db"
 import finalizeStocktaking from "./finalizeStocktaking"
 import { mockCtx } from "@/test/createMockContext"
+import { vi } from "vitest"
+
+// mock buildPDF mutation
+vi.mock("./buildPDF", () => {
+  return {
+    default: vi.fn(async () => {
+      return Buffer.from("PDFDATA")
+    }),
+  }
+})
 
 async function makeSampleData() {
   const user = await db.user.create({ data: { email: "x@example.com" } })

@@ -10,7 +10,7 @@ export default resolver.pipe(
       data: {
         location: { connect: { id: input.locationId } },
         variant: { connect: { id: input.variantId } },
-        quantity: input.quantity,
+        quantity: Number(input.quantity),
         description: input.description && input.description.length > 0 ? input.description : null,
       },
     })

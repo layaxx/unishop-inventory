@@ -38,7 +38,7 @@ const Breadcrumbs: FC<
 
             {createNew && (
               <BreadcrumbItem>
-                <BreadcrumbLink>
+                <BreadcrumbLink asChild>
                   <Link href={createNew}>
                     <Plus />
                   </Link>
