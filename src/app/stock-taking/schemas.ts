@@ -22,3 +22,7 @@ export const GetInventoryEntriesSchema = z.object({
     })
     .optional(),
 })
+
+export const FinalizeStocktakingInput = z.object({
+  locationId: z.number().min(0, "Location is required"),
+})

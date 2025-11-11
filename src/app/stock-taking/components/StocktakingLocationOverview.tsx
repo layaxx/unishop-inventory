@@ -8,6 +8,7 @@ import UntrackedVariants from "./UntrackedVariants"
 import { getName } from "@/src/lib/variant"
 import { FC, useRef } from "react"
 import getLocation from "../../locations/queries/getLocation"
+import FinalizeStocktaking from "./FinalizeStocktaking"
 
 const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId }) => {
   const [inventoryEntries] = useQuery(getInventoryEntries, { where: { locationId } })
@@ -43,6 +44,8 @@ const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId })
           <UntrackedVariants locationId={locationId} formRef={formRef} />
         </div>
       </div>
+
+      <FinalizeStocktaking locationId={locationId} />
     </div>
   )
 }

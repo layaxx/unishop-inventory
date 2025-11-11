@@ -28,7 +28,7 @@ export function NavProjects() {
               ) : (
                 <Folder className="text-sidebar-foreground/70" />
               )}
-              {isActiveInventory ? <span>Running</span> : <span>Start Stocktaking</span>}
+              {isActiveInventory ? <span>Running...</span> : <span>Start Stocktaking</span>}
             </SidebarMenuButton>
           </Link>
         </SidebarMenuItem>
