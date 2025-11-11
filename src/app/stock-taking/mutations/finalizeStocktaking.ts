@@ -1,11 +1,11 @@
 import { resolver } from "@blitzjs/rpc"
-import db from "db"
+import db, { MovementType } from "db"
 import { FinalizeStocktakingInput } from "../schemas"
 
 export default resolver.pipe(
   resolver.zod(FinalizeStocktakingInput),
   resolver.authorize(),
-  async ({ locationId }) => {
+  async ({ locationId }, ctx) => {
     // assert no untracked variants exist
     const trackedVariantIds = await db.inventoryEntry.findMany({
       select: { variantId: true },
@@ -37,30 +37,64 @@ export default resolver.pipe(
         _sum: { quantity: true },
       })
 
-      for (const group of groups) {
+      const updatePromises = groups.map(async (group) => {
         if (!group._sum.quantity) {
           throw new Error("Invariant violation: quantity sum is null")
         }
-        await tx.stockLevel.upsert({
-          where: {
-            locationId_variantId: {
+
+        const previousStockLevel = await tx.stockLevel.findFirst({
+          where: { variantId: group.variantId, locationId },
+        })
+
+        if (previousStockLevel) {
+          const diff = group._sum.quantity - previousStockLevel.quantity
+          if (diff !== 0) {
+            if (diff > 0) {
+              await tx.movement.create({
+                data: {
+                  variantId: group.variantId,
+                  toId: locationId,
+                  quantity: diff,
+                  type: MovementType.ADJUSTMENT,
+                },
+              })
+            } else {
+              await tx.movement.create({
+                data: {
+                  variantId: group.variantId,
+                  fromId: locationId,
+                  quantity: Math.abs(diff),
+                  type: MovementType.ADJUSTMENT,
+                },
+              })
+            }
+          }
+          return tx.stockLevel.update({
+            where: { id: previousStockLevel.id },
+            data: { quantity: group._sum.quantity },
+          })
+        } else {
+          return tx.stockLevel.create({
+            data: {
               variantId: group.variantId,
               locationId,
+              quantity: group._sum.quantity,
             },
-          },
-          create: {
-            variantId: group.variantId,
-            locationId,
-            quantity: group._sum.quantity,
-          },
-          update: {
-            quantity: group._sum.quantity,
-          },
-        })
-      }
+          })
+        }
+      })
+
+      await Promise.all(updatePromises)
 
       // remove all inventoryEvents for the location
-      await db.inventoryEntry.deleteMany({ where: { locationId } })
+      await tx.inventoryEntry.deleteMany({ where: { locationId } })
+      await tx.auditLogStocktaking.create({
+        data: {
+          locationId,
+          userId: ctx.session.userId,
+          success: true,
+        },
+      })
     })
 
     return true
