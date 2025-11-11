@@ -24,7 +24,7 @@ export function NavMain({
     isActive?: boolean
     items?: {
       title: string
-      url: URL | string
+      url: string
     }[]
   }[]
 }) {
@@ -52,7 +52,7 @@ export function NavMain({
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <Link href={subItem.url}>
+                        <Link href={{ pathname: subItem.url }}>
                           <span>{subItem.title}</span>
                         </Link>
                       </SidebarMenuSubButton>

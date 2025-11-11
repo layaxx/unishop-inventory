@@ -26,7 +26,7 @@ const Breadcrumbs: FC<
               <Fragment key={crumb.url}>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink asChild>
-                    <Link href={crumb.url}>{crumb.name}</Link>
+                    <Link href={{ pathname: crumb.url }}>{crumb.name}</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
@@ -39,7 +39,7 @@ const Breadcrumbs: FC<
             {createNew && (
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href={createNew}>
+                  <Link href={{ pathname: createNew }}>
                     <Plus />
                   </Link>
                 </BreadcrumbLink>

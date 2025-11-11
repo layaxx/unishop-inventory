@@ -1,4 +1,4 @@
-import {useQuery} from "@blitzjs/rpc"
+import { useQuery } from "@blitzjs/rpc"
 import getCurrentUser from "../queries/getCurrentUser"
 
 export const useCurrentUser = () => {

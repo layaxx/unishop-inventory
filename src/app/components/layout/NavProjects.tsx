@@ -21,7 +21,7 @@ export function NavProjects() {
       <SidebarGroupLabel>Stocktaking</SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuItem>
-          <Link href="/stock-taking/">
+          <Link href="/stock-taking">
             <SidebarMenuButton className="text-sidebar-foreground/70">
               {isActiveInventory ? (
                 <FolderOpen className="text-sidebar-foreground/70" />
