@@ -1,8 +1,8 @@
 import { useQuery } from "@blitzjs/rpc"
 import { FC } from "react"
 import getProductVariants from "../../queries/getProductVariants"
-import { DataTable } from "../../../components/DataTable"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
+import { DataTable } from "@/src/app/components/DataTable"
 
 const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
   const [types] = useQuery(getProductModifierTypes, { productId })

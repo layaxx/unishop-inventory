@@ -1,9 +1,9 @@
+import FileUpload from "@/src/app/components/FileUpload"
 import React, { Suspense } from "react"
 import { Form, FormProps } from "src/app/components/Form"
 import { LabeledTextField } from "src/app/components/LabeledTextField"
 
 import { z } from "zod"
-import FileUpload from "../../components/FileUpload"
 export { FORM_ERROR } from "src/app/components/Form"
 
 export function ProductForm<S extends z.ZodType<any, any>>(props: FormProps<S>) {

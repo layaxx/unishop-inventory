@@ -1,7 +1,3 @@
-import Form, { FORM_ERROR } from "../../components/Form"
-import LabeledTextField from "../../components/LabeledTextField"
-import LocationSelector from "../../components/LocationSelector"
-import VariantSelector from "../../components/VariantSelector"
 import { CreateInventoryEntrySchema } from "../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import createInventoryEntryMutation from "../mutations/createInventoryEntry"
@@ -9,6 +5,9 @@ import getInventoryEntries from "../queries/getInventoryEntries"
 import { FC } from "react"
 import getUntrackedVariants from "../queries/getUntrackedVariants"
 import isActiveInventory from "../queries/isActiveInventory"
+import Form, { FORM_ERROR } from "@/src/app/components/Form"
+import LabeledTextField from "@/src/app/components/LabeledTextField"
+import VariantSelector from "@/src/app/components/VariantSelector"
 
 const NewStocktakingEntry: FC<{ locationId: number; innerRef: React.Ref<any> }> = ({
   locationId,

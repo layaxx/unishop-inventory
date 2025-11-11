@@ -3,7 +3,6 @@
 import { useQuery } from "@blitzjs/rpc"
 import getInventoryEntries from "../queries/getInventoryEntries"
 import NewStocktakingEntry from "./NewStocktakingEntry"
-import { DataTable } from "../../components/DataTable"
 import UntrackedVariants from "./UntrackedVariants"
 import { getName } from "@/src/lib/variant"
 import { FC, useRef } from "react"
@@ -11,6 +10,7 @@ import getLocation from "../../locations/queries/getLocation"
 import FinalizeStocktaking from "./FinalizeStocktaking"
 import { Button } from "@/components/ui/button"
 import { ErrorBoundary } from "@blitzjs/next"
+import { DataTable } from "@/src/app/components/DataTable"
 
 const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId }) => {
   const [inventoryEntries] = useQuery(getInventoryEntries, { where: { locationId } })

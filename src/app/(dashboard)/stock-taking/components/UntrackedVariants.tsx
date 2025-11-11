@@ -1,9 +1,9 @@
 import { useQuery } from "@blitzjs/rpc"
 import { FC, RefObject } from "react"
 import getUntrackedVariants from "../queries/getUntrackedVariants"
-import { DataTable } from "../../components/DataTable"
 import { getName } from "@/src/lib/variant"
 import { Button } from "@/components/ui/button"
+import { DataTable } from "@/src/app/components/DataTable"
 
 const UntrackedVariants: FC<{
   locationId: number

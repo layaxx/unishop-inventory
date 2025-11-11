@@ -1,7 +1,7 @@
 import { Metadata } from "next"
-import Breadcrumbs from "../components/layout/Breadcrumbs"
 import { Suspense } from "react"
 import StocktakingOverview from "./components/StocktakingOverview"
+import Breadcrumbs from "../../components/layout/Breadcrumbs"
 
 export const metadata: Metadata = {
   title: "Stocktaking",

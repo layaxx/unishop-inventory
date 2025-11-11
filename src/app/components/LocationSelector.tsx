@@ -12,10 +12,10 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { useQuery } from "@blitzjs/rpc"
-import { ErrorMessage, useField, useFormikContext } from "formik"
+import { ErrorMessage, useField } from "formik"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { FC, useState } from "react"
-import getLocations from "../locations/queries/getLocations"
+import getLocations from "../(dashboard)/locations/queries/getLocations"
 
 const LocationSelector: FC<{ name: string; label: string }> = ({ name, label }) => {
   const [input] = useField(name)

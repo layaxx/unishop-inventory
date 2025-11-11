@@ -10,8 +10,8 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useQuery } from "@blitzjs/rpc"
-import isActiveInventoryQuery from "../../stock-taking/queries/isActiveInventory"
 import Link from "next/link"
+import isActiveInventoryQuery from "../../(dashboard)/stock-taking/queries/isActiveInventory"
 
 export function NavProjects() {
   const [isActiveInventory] = useQuery(isActiveInventoryQuery, {})

@@ -8,7 +8,7 @@ const SidebarLayout: FC<PropsWithChildren> = ({ children }) => {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <ErrorBoundary>{children}</ErrorBoundary>
+        <ErrorBoundary fallback={<>test fallback</>}>{children}</ErrorBoundary>
       </SidebarInset>
     </SidebarProvider>
   )

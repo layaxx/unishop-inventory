@@ -1,23 +1,23 @@
 import { Metadata } from "next"
 import Link from "next/link"
 import { Suspense } from "react"
-import { ProductsList } from "./components/ProductsList"
-import Breadcrumbs from "../components/layout/Breadcrumbs"
+import { LocationsList } from "./components/LocationsList"
+import Breadcrumbs from "../../components/layout/Breadcrumbs"
 
 export const metadata: Metadata = {
-  title: "Products",
-  description: "List of Products",
+  title: "Locations",
+  description: "List of locations",
 }
 
 export default function Page() {
   return (
-    <Breadcrumbs page="Products" pre={[]}>
+    <Breadcrumbs page="Locations" pre={[]}>
       <div>
         <p className="underline">
-          <Link href="/products/new">Create Product</Link>
+          <Link href={"/locations/new"}>Create Location</Link>
         </p>
         <Suspense fallback={<div>Loading...</div>}>
-          <ProductsList />
+          <LocationsList />
         </Suspense>
       </div>
     </Breadcrumbs>
