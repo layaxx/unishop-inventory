@@ -112,8 +112,11 @@ const buildTables = async (locationId: number) => {
 
   let latex = ""
 
-  // --- Build one table per product ---
-  for (const [product, variants] of Object.entries(grouped)) {
+  const data = Object.entries(grouped)
+  // sort by product name
+  data.sort((a, b) => a[0].localeCompare(b[0]))
+
+  for (const [product, variants] of data) {
     // Collect modifier types used only in this product
     latex += buildProductTable(variants, product)
   }
