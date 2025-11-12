@@ -46,7 +46,7 @@ export function buildProductTable(
 \\endfirsthead
 
 \\hline
-\\textbf{Artikel} & ${modifierTypes
+\\textbf{Artikel (Fortsetzung)} & ${modifierTypes
     .map((t) => `\\textbf{${t}} & `)
     .join("")}  \\textbf{Anzahl} \\\\ \\hline
 \\endhead
@@ -67,6 +67,8 @@ export function buildProductTable(
   const groupedByFirstSorted = Object.entries(groupedByFirst)
   // sort by group value
   groupedByFirstSorted.sort((a, b) => a[0].localeCompare(b[0]))
+
+  let totalIndex = 0
 
   for (const [groupValue, groupVariants] of groupedByFirstSorted) {
     const groupMultirow =
@@ -102,6 +104,7 @@ export function buildProductTable(
     })
 
     groupVariants.forEach((s, i) => {
+      totalIndex++
       const modifiers = Object.fromEntries(
         s.variant.modifierValues.map((mv) => [mv.modifierType.name, mv.value])
       )
@@ -113,10 +116,14 @@ export function buildProductTable(
 
       const prefixProduct = !productPrinted ? productMultirow : ""
       const prefixGroup = i === 0 ? groupMultirow : ""
-      const lineEnd =
+      let lineEnd =
         i < groupVariants.length - 1
           ? `\\\\ \\cline{3-${modifierTypes.length + 2}}`
-          : `\\\\ \\hline`
+          : `\\\\ \\cline{2-${modifierTypes.length + 2}}`
+
+      if (totalIndex === variants.length) {
+        lineEnd = `\\\\ \\hline`
+      }
 
       latex += `${prefixProduct} & ${prefixGroup} & ${otherModifiers} ${s.quantity} ${lineEnd}\n`
       productPrinted = true
