@@ -6,6 +6,7 @@ import { tmpdir } from "node:os"
 import { exec } from "node:child_process"
 import db from "@/db"
 import { promisify } from "node:util"
+import { buildProductTable } from "@/lib/pdf/productTable"
 
 const execAsync = promisify(exec)
 
@@ -82,7 +83,7 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 
 const BuildPDFSchema = z.object({ locationId: z.number().min(0) })
 
-const buildTable = async (locationId: number) => {
+const buildTables = async (locationId: number) => {
   const stockData = await db.stockLevel.findMany({
     where: { locationId },
     include: {
@@ -114,56 +115,7 @@ const buildTable = async (locationId: number) => {
   // --- Build one table per product ---
   for (const [product, variants] of Object.entries(grouped)) {
     // Collect modifier types used only in this product
-    const modifierTypes = Array.from(
-      new Set(variants.flatMap((s) => s.variant.modifierValues.map((mv) => mv.modifierType.name)))
-    )
-
-    // Table header
-    latex += `
-\\section*{Produkt: ${product}}
-\\begin{tabularx}{\\textwidth}{|X|${modifierTypes.map(() => "l|").join("")}r|}
-\\hline
-\\textbf{Product Name} & ${modifierTypes
-      .map((t) => `\\textbf{${t}} & `)
-      .join("")}\\textbf{Stock Level} \\\\ \\hline
-\\endfirsthead
-
-\\hline
-\\textbf{Product Name} & ${modifierTypes
-      .map((t) => `\\textbf{${t}} & `)
-      .join("")} \\textbf{Stock Level} \\\\ \\hline
-\\endhead
-
-\\hline
-\\multicolumn{${modifierTypes.length + 2}}{r}{\\textit{Continued on next page}} \\\\
-\\endfoot
-
-\\hline
-\\endlastfoot
-`
-
-    // --- Table rows ---
-    const multirow =
-      variants.length > 1 ? `\\multirow[t]{${variants.length}}{*}{${product}}` : product
-
-    variants.forEach((s, i) => {
-      const modifiers = Object.fromEntries(
-        s.variant.modifierValues.map((mv) => [mv.modifierType.name, mv.value])
-      )
-
-      const cols = modifierTypes.map((t) => (modifiers[t] ?? "") + " & ").join("")
-      const prefix = i === 0 ? multirow : ""
-      const lineEnd =
-        i < variants.length - 1 ? `\\\\ \\cline{2-${modifierTypes.length + 2}}` : `\\\\ \\hline`
-      latex += `${prefix} & ${cols} ${s.quantity} ${lineEnd}\n`
-    })
-
-    const total = variants.reduce((sum, s) => sum + s.quantity, 0)
-    latex += `\\multicolumn{${
-      modifierTypes.length + 1
-    }}{|r|}{\\textbf{${product} Total}} & \\textbf{${total}} \\\\ \\hline\n`
-
-    latex += `\\end{tabularx}\n\\bigskip\n`
+    latex += buildProductTable(variants, product)
   }
 
   return latex.trim()
@@ -173,7 +125,7 @@ export default resolver.pipe(
   resolver.zod(BuildPDFSchema),
   resolver.authorize(),
   async (data, ctx) => {
-    const latexText = template.replace("###TABLE###", await buildTable(data.locationId))
+    const latexText = template.replace("###TABLE###", await buildTables(data.locationId))
 
     // render latex to pdf
     return await renderToPDF(latexText)
