@@ -17,12 +17,20 @@ const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
       <DataTable
         data={
           variants?.productVariants.map((x) => {
+            const stockLevels = Array.isArray((x as any).stockLevels) ? (x as any).stockLevels : []
+            const totalStock = stockLevels.reduce(
+              (acc: number, level: any) => acc + (level?.quantity ?? 0),
+              0
+            )
+
             const obj: Record<string, string | number> = {
-              totalStock: x.stockLevels.reduce((acc, level) => acc + level.quantity, 0),
+              totalStock,
             }
 
             for (const type of types ?? []) {
-              const value = x.modifierValues.find((mv) => mv.modifierTypeId === type.id)?.value
+              const value = ((x as any).modifierValues as any[] | undefined)?.find(
+                (mv) => mv.modifierTypeId === type.id
+              )?.value
 
               obj["mod" + type.id] = value || "(Default)"
             }
