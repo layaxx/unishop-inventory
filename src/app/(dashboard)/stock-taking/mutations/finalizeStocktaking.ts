@@ -104,10 +104,12 @@ export default resolver.pipe(
 
     try {
       const pdf = await buildPDF({ locationId }, ctx)
+
       await db.auditLogStocktaking.update({
         where: { id: auditId },
         data: { pdfReport: pdf },
       })
+      console.log("Stocktaking PDF built and saved to audit log.")
     } catch (e) {
       console.error("Failed to build stocktaking PDF:", e)
     }

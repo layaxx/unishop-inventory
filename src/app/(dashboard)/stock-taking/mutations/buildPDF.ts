@@ -4,6 +4,10 @@ import fs from "node:fs/promises"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
 import { exec } from "node:child_process"
+import db from "@/db"
+import { promisify } from "node:util"
+
+const execAsync = promisify(exec)
 
 const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class in A4 format
 \\setlength{\\voffset}{-15pt}
@@ -16,6 +20,8 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 \\usepackage{charter} % Use the Charter font
 \\usepackage{microtype} % Slightly tweak font spacing for aesthetics
 \\usepackage{lastpage}
+\\usepackage{multirow}
+\\usepackage{tabularx}
 
 \\usepackage[english, ngerman]{babel} % Language hyphenation and typographical rules
 
@@ -62,6 +68,7 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 \\end{minipage}
 \\bigskip 
 
+###TABLE###
 
 \\begin{minipage}[t][3cm][t]{6cm}%
   \\hrulefill                           \\\\\\textit{Ort, Unterschrift}
@@ -70,18 +77,80 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 \\end{document}
 `
 
-const BuildPDFSchema = z.object({})
+const BuildPDFSchema = z.object({ locationId: z.number().min(0) })
 
-const buildTable = (data: any) => {
-  // FIXME: implement table building logic
-  return ""
+const buildTable = async (locationId: number) => {
+  const stockData = await db.stockLevel.findMany({
+    where: { locationId },
+    include: {
+      variant: {
+        include: {
+          product: { select: { name: true } },
+          modifierValues: {
+            include: { modifierType: { select: { name: true } } },
+          },
+        },
+      },
+    },
+  })
+
+  // 1️⃣ Find all unique modifier types across all variants
+  const modifierTypes = Array.from(
+    new Set(stockData.flatMap((s) => s.variant.modifierValues.map((mv) => mv.modifierType.name)))
+  )
+
+  // 2️⃣ Group stock levels by product name
+  const grouped: Record<string, typeof stockData> = {}
+  for (const s of stockData) {
+    const pName = s.variant.product.name
+    if (!grouped[pName]) grouped[pName] = []
+    grouped[pName].push(s)
+  }
+
+  // 3️⃣ Build LaTeX header
+  let latex = `
+\\begin{table}[h!]
+\\centering
+\\caption{Stock Levels by Product Variant}
+\\label{tab:stocklevels}
+\\begin{tabularx}{\\textwidth}{|l|${modifierTypes.map(() => "X|").join("")}r|}
+\\hline
+\\textbf{Product Name} & ${modifierTypes
+    .map((t) => `\\textbf{${t}}`)
+    .join(" & ")} & \\textbf{Stock Level} \\\\ \\hline
+`
+
+  // 4️⃣ Build table body
+  for (const [product, variants] of Object.entries(grouped)) {
+    const multirow = variants.length > 1 ? `\\multirow{${variants.length}}{*}{${product}}` : product
+
+    variants.forEach((s, i) => {
+      const modifiers = Object.fromEntries(
+        s.variant.modifierValues.map((mv) => [mv.modifierType.name, mv.value])
+      )
+
+      const cols = modifierTypes.map((t) => modifiers[t] ?? "").join(" & ")
+      const prefix = i === 0 ? multirow : ""
+      const lineEnd =
+        i < variants.length - 1 ? `\\\\ \\cline{2-${modifierTypes.length + 2}}` : `\\\\ \\hline`
+      latex += `${prefix} & ${cols} & ${s.quantity} ${lineEnd}\n`
+    })
+  }
+
+  // 5️⃣ Close table
+  latex += `
+\\end{tabularx}
+\\end{table}
+`
+
+  return latex.trim()
 }
 
 export default resolver.pipe(
   resolver.zod(BuildPDFSchema),
   resolver.authorize(),
   async (data, ctx) => {
-    const latexText = template.replace("###TABLE###", buildTable(data))
+    const latexText = template.replace("###TABLE###", await buildTable(data.locationId))
 
     // render latex to pdf
     return await renderToPDF(latexText)
@@ -95,15 +164,16 @@ async function renderToPDF(latexText: string): Promise<Buffer> {
 
   await fs.writeFile(texFilePath, latexText)
 
-  await new Promise<void>((resolve, reject) => {
-    exec(`pdflatex -output-directory=${tmpDirectory} ${texFilePath}`, (error) => {
-      if (error) {
-        reject(error)
-        return
-      }
-      resolve()
-    })
-  })
+  try {
+    const { stdout, stderr } = await execAsync(
+      `pdflatex -interaction=nonstopmode -output-directory=${tmpDirectory} ${texFilePath}`
+    )
+
+    if (stderr) console.error("LaTeX errors:", stderr)
+    console.log("✅ Compilation done!")
+  } catch (err) {
+    console.error("❌ LaTeX compilation failed:", err)
+  }
 
   const pdfBuffer = await fs.readFile(pdfFilePath)
 

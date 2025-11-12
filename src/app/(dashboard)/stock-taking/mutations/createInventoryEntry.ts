@@ -15,6 +15,8 @@ export default resolver.pipe(
       },
     })
 
+    console.log("ENTRY-EVENT", input)
+
     return entry
   }
 )
