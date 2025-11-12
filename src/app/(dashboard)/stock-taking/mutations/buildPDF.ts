@@ -101,10 +101,7 @@ const buildTable = async (locationId: number) => {
     return "% No stock data available\n"
   }
 
-  const modifierTypes = Array.from(
-    new Set(stockData.flatMap((s) => s.variant.modifierValues.map((mv) => mv.modifierType.name)))
-  )
-
+  // Group by product
   const grouped: Record<string, typeof stockData> = {}
   for (const s of stockData) {
     const pName = s.variant.product.name
@@ -112,22 +109,29 @@ const buildTable = async (locationId: number) => {
     grouped[pName].push(s)
   }
 
-  let latex = `
-% Required packages:
-% \\usepackage{longtable}
-% \\usepackage{multirow}
+  let latex = ""
 
+  // --- Build one table per product ---
+  for (const [product, variants] of Object.entries(grouped)) {
+    // Collect modifier types used only in this product
+    const modifierTypes = Array.from(
+      new Set(variants.flatMap((s) => s.variant.modifierValues.map((mv) => mv.modifierType.name)))
+    )
+
+    // Table header
+    latex += `
+\\section*{Produkt: ${product}}
 \\begin{tabularx}{\\textwidth}{|X|${modifierTypes.map(() => "l|").join("")}r|}
 \\hline
 \\textbf{Product Name} & ${modifierTypes
-    .map((t) => `\\textbf{${t}}`)
-    .join(" & ")} & \\textbf{Stock Level} \\\\ \\hline
+      .map((t) => `\\textbf{${t}} & `)
+      .join("")}\\textbf{Stock Level} \\\\ \\hline
 \\endfirsthead
 
 \\hline
 \\textbf{Product Name} & ${modifierTypes
-    .map((t) => `\\textbf{${t}}`)
-    .join(" & ")} & \\textbf{Stock Level} \\\\ \\hline
+      .map((t) => `\\textbf{${t}} & `)
+      .join("")} \\textbf{Stock Level} \\\\ \\hline
 \\endhead
 
 \\hline
@@ -138,7 +142,7 @@ const buildTable = async (locationId: number) => {
 \\endlastfoot
 `
 
-  for (const [product, variants] of Object.entries(grouped)) {
+    // --- Table rows ---
     const multirow =
       variants.length > 1 ? `\\multirow[t]{${variants.length}}{*}{${product}}` : product
 
@@ -147,17 +151,20 @@ const buildTable = async (locationId: number) => {
         s.variant.modifierValues.map((mv) => [mv.modifierType.name, mv.value])
       )
 
-      const cols = modifierTypes.map((t) => modifiers[t] ?? "").join(" & ")
+      const cols = modifierTypes.map((t) => (modifiers[t] ?? "") + " & ").join("")
       const prefix = i === 0 ? multirow : ""
       const lineEnd =
         i < variants.length - 1 ? `\\\\ \\cline{2-${modifierTypes.length + 2}}` : `\\\\ \\hline`
-      latex += `${prefix} & ${cols} & ${s.quantity} ${lineEnd}\n`
+      latex += `${prefix} & ${cols} ${s.quantity} ${lineEnd}\n`
     })
-  }
 
-  latex += `
-\\end{tabularx}
-`
+    const total = variants.reduce((sum, s) => sum + s.quantity, 0)
+    latex += `\\multicolumn{${
+      modifierTypes.length + 1
+    }}{|r|}{\\textbf{${product} Total}} & \\textbf{${total}} \\\\ \\hline\n`
+
+    latex += `\\end{tabularx}\n\\bigskip\n`
+  }
 
   return latex.trim()
 }
