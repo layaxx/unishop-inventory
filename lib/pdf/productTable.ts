@@ -1,17 +1,11 @@
 export function buildProductTable(
-  variants: ({
+  variants: Array<{
     variant: {
-      product: { name: string }
-      modifierValues: ({ modifierType: { name: string } } & {
-        value: string
-        id: number
-        updatedAt: Date
-        createdAt: Date
-        modifierTypeId: number
-        order: number
-      })[]
-    } & { id: number; updatedAt: Date; image: string | null; createdAt: Date; productId: number }
-  } & { locationId: number; id: number; variantId: number; quantity: number; updatedAt: Date })[],
+      modifierValues: { modifierType: { name: string }; value: string }[]
+    }
+
+    quantity: Record<string, number>
+  }>,
   productName: string
 ) {
   let latex = ""
@@ -20,6 +14,8 @@ export function buildProductTable(
   const modifierTypes = Array.from(
     new Set(variants.flatMap((s) => s.variant.modifierValues.map((mv) => mv.modifierType.name)))
   )
+
+  const numLocations = Object.keys(variants[0].quantity).length
 
   if (modifierTypes.length === 0) modifierTypes.push("Variante")
 
@@ -36,23 +32,22 @@ export function buildProductTable(
   }
 
   // --- Table header ---
+  const numCols = 1 + modifierTypes.length + numLocations + (numLocations > 1 ? 1 : 0)
   latex += `
 \\section*{${productName}}
-\\begin{tabularx}{\\textwidth}{|X|${modifierTypes.map(() => "l|").join("")}r|}
-\\hline
-\\textbf{Artikel} & ${modifierTypes
-    .map((t) => `\\textbf{${t}} &`)
-    .join("")} \\textbf{Anzahl} \\\\ \\hline
+\\begin{tabularx}{\\textwidth}{|X|${modifierTypes.map(() => "l|").join("")}${Array.from({
+    length: numLocations,
+  })
+    .map(() => "r|")
+    .join("")}r|}
+${makeHeader(modifierTypes, Object.keys(variants[0].quantity), false)}
 \\endfirsthead
 
-\\hline
-\\textbf{Artikel (Fortsetzung)} & ${modifierTypes
-    .map((t) => `\\textbf{${t}} & `)
-    .join("")}  \\textbf{Anzahl} \\\\ \\hline
+${makeHeader(modifierTypes, Object.keys(variants[0].quantity), true)}
 \\endhead
 
 \\hline
-\\multicolumn{${modifierTypes.length + 2}}{r}{\\textit{Fortsetzung auf der nächsten Seite}} \\\\
+\\multicolumn{${numCols}}{r}{\\textit{Fortsetzung auf der nächsten Seite}} \\\\
 \\endfoot
 
 \\hline
@@ -117,24 +112,32 @@ export function buildProductTable(
       const prefixProduct = !productPrinted ? productMultirow : ""
       const prefixGroup = i === 0 ? groupMultirow : ""
       let lineEnd =
-        i < groupVariants.length - 1
-          ? `\\\\ \\cline{3-${modifierTypes.length + 2}}`
-          : `\\\\ \\cline{2-${modifierTypes.length + 2}}`
+        i < groupVariants.length - 1 ? `\\\\ \\cline{3-${numCols}}` : `\\\\ \\cline{2-${numCols}}`
 
       if (totalIndex === variants.length) {
         lineEnd = `\\\\ \\hline`
       }
 
-      latex += `${prefixProduct} & ${prefixGroup} & ${otherModifiers} ${s.quantity} ${lineEnd}\n`
+      const quantities = Object.values(s.quantity).join(" & ")
+
+      const sum =
+        numLocations > 1 ? " & " + Object.values(s.quantity).reduce((a, b) => a + b, 0) : ""
+
+      latex += `${prefixProduct} & ${prefixGroup} & ${otherModifiers} ${quantities} ${sum} ${lineEnd}\n`
       productPrinted = true
     })
   }
 
   // --- Total row ---
-  const total = variants.reduce((sum, s) => sum + s.quantity, 0)
+  const total = variants.reduce(
+    (sum, s) => sum + Object.values(s.quantity).reduce((curr, prev) => curr + prev, 0),
+    0
+  )
   latex += `\\multicolumn{${
     modifierTypes.length + 1
-  }}{|r|}{\\textbf{${productName} Gesamt}} & \\textbf{${total}} \\\\ \\hline\n`
+  }}{|r|}{\\textbf{${productName} Gesamt}} &  ${Object.keys(variants[0].quantity)
+    .map((k) => variants.reduce((sum, s) => sum + s.quantity[k as string] || 0, 0))
+    .join(" & ")} ${numLocations > 1 ? `& \\textbf{${total}}` : ""} \\\\ \\hline\n`
 
   latex += `\\end{tabularx}\n\n`
   return latex
@@ -156,4 +159,20 @@ function isValidSizeString(aValue: string) {
 }
 function parseSizeString(aValue: string): number {
   return sizeMap[aValue.toLowerCase()] || 100
+}
+function translate(modifierType: string): string {
+  const translations: Record<string, string> = {
+    Color: "Farbe",
+    Size: "Größe",
+  }
+  return translations[modifierType] || modifierType
+}
+
+function makeHeader(modifierTypes: string[], locationNames: string[], isContinuation: boolean) {
+  return `\\hline
+\\textbf{Artikel${isContinuation ? " (Fortsetzung)" : ""}} & ${modifierTypes
+    .map((t) => `\\textbf{${translate(t)}} &`)
+    .join("")} ${locationNames.map((k) => `\\textbf{Anzahl ${k}}`).join(" & ")} ${
+    locationNames.length > 1 ? `& \\textbf{Summe}` : ""
+  } \\\\ \\hline`
 }

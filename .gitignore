@@ -37,3 +37,7 @@ yarn-error.log*
 next-env.d.ts
 
 .vscode
+
+log.log
+k18.sql
+both.sql

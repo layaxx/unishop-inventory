@@ -116,9 +116,17 @@ const buildTables = async (locationId: number) => {
   // sort by product name
   data.sort((a, b) => a[0].localeCompare(b[0]))
 
+  const locationName =
+    (await db.location.findUnique({ where: { id: locationId } }))?.name || "Unbekannt"
+
   for (const [product, variants] of data) {
     // Collect modifier types used only in this product
-    latex += buildProductTable(variants, product)
+    latex += buildProductTable(
+      variants.map((variant) => {
+        return { ...variant, quantity: { [locationName]: variant.quantity } }
+      }),
+      product
+    )
   }
 
   return latex.trim()
@@ -158,7 +166,7 @@ async function renderToPDF(latexText: string): Promise<Buffer> {
   const pdfBuffer = await fs.readFile(pdfFilePath)
 
   // clean up temporary files
-  // FIXME: uncomment await fs.rm(tmpDirectory, { recursive: true, force: true })
+  await fs.rm(tmpDirectory, { recursive: true, force: true })
 
   return pdfBuffer
 }
