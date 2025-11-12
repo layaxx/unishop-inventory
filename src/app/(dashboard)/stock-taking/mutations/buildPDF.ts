@@ -22,6 +22,9 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 \\usepackage{lastpage}
 \\usepackage{multirow}
 \\usepackage{tabularx}
+\\usepackage{longtable}
+\\usepackage{ltablex}
+\\keepXColumns
 
 \\usepackage[english, ngerman]{babel} % Language hyphenation and typographical rules
 
@@ -94,12 +97,14 @@ const buildTable = async (locationId: number) => {
     },
   })
 
-  // 1️⃣ Find all unique modifier types across all variants
+  if (stockData.length === 0) {
+    return "% No stock data available\n"
+  }
+
   const modifierTypes = Array.from(
     new Set(stockData.flatMap((s) => s.variant.modifierValues.map((mv) => mv.modifierType.name)))
   )
 
-  // 2️⃣ Group stock levels by product name
   const grouped: Record<string, typeof stockData> = {}
   for (const s of stockData) {
     const pName = s.variant.product.name
@@ -107,22 +112,35 @@ const buildTable = async (locationId: number) => {
     grouped[pName].push(s)
   }
 
-  // 3️⃣ Build LaTeX header
   let latex = `
-\\begin{table}[h!]
-\\centering
-\\caption{Stock Levels by Product Variant}
-\\label{tab:stocklevels}
-\\begin{tabularx}{\\textwidth}{|l|${modifierTypes.map(() => "X|").join("")}r|}
+% Required packages:
+% \\usepackage{longtable}
+% \\usepackage{multirow}
+
+\\begin{tabularx}{\\textwidth}{|X|${modifierTypes.map(() => "l|").join("")}r|}
 \\hline
 \\textbf{Product Name} & ${modifierTypes
     .map((t) => `\\textbf{${t}}`)
     .join(" & ")} & \\textbf{Stock Level} \\\\ \\hline
+\\endfirsthead
+
+\\hline
+\\textbf{Product Name} & ${modifierTypes
+    .map((t) => `\\textbf{${t}}`)
+    .join(" & ")} & \\textbf{Stock Level} \\\\ \\hline
+\\endhead
+
+\\hline
+\\multicolumn{${modifierTypes.length + 2}}{r}{\\textit{Continued on next page}} \\\\
+\\endfoot
+
+\\hline
+\\endlastfoot
 `
 
-  // 4️⃣ Build table body
   for (const [product, variants] of Object.entries(grouped)) {
-    const multirow = variants.length > 1 ? `\\multirow{${variants.length}}{*}{${product}}` : product
+    const multirow =
+      variants.length > 1 ? `\\multirow[t]{${variants.length}}{*}{${product}}` : product
 
     variants.forEach((s, i) => {
       const modifiers = Object.fromEntries(
@@ -137,10 +155,8 @@ const buildTable = async (locationId: number) => {
     })
   }
 
-  // 5️⃣ Close table
   latex += `
 \\end{tabularx}
-\\end{table}
 `
 
   return latex.trim()
@@ -166,7 +182,7 @@ async function renderToPDF(latexText: string): Promise<Buffer> {
 
   try {
     const { stdout, stderr } = await execAsync(
-      `pdflatex -interaction=nonstopmode -output-directory=${tmpDirectory} ${texFilePath}`
+      `latexmk -pdf -interaction=nonstopmode -output-directory=${tmpDirectory} ${texFilePath}`
     )
 
     if (stderr) console.error("LaTeX errors:", stderr)
@@ -175,10 +191,12 @@ async function renderToPDF(latexText: string): Promise<Buffer> {
     console.error("❌ LaTeX compilation failed:", err)
   }
 
+  console.log("Reading generated PDF from:", pdfFilePath)
+
   const pdfBuffer = await fs.readFile(pdfFilePath)
 
   // clean up temporary files
-  await fs.rm(tmpDirectory, { recursive: true, force: true })
+  // FIXME: uncomment await fs.rm(tmpDirectory, { recursive: true, force: true })
 
   return pdfBuffer
 }
