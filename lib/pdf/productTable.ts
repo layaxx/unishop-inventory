@@ -34,6 +34,7 @@ export function buildProductTable(
   // --- Table header ---
   const numCols = 1 + modifierTypes.length + numLocations + (numLocations > 1 ? 1 : 0)
   latex += `
+\\needspace{5cm}
 \\section*{${productName}}
 \\begin{tabularx}{\\textwidth}{|X|${modifierTypes.map(() => "l|").join("")}${Array.from({
     length: numLocations,

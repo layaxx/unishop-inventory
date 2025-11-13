@@ -103,7 +103,7 @@ export default resolver.pipe(
     })
 
     try {
-      const pdf = await buildPDF({ locationId }, ctx)
+      const pdf = await buildPDF({ locationIds: [locationId] }, ctx)
 
       await db.auditLogStocktaking.update({
         where: { id: auditId },

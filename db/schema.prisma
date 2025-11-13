@@ -190,4 +190,13 @@ model AuditLogStocktaking {
   success    Boolean
   pdfReport  Bytes?
   createdAt  DateTime @default(now())
+  PDF        PDF?     @relation(fields: [pDFId], references: [id])
+  pDFId      Int?
+}
+
+model PDF {
+  id        Int                   @id @default(autoincrement())
+  data      Bytes
+  createdAt DateTime              @default(now())
+  audits    AuditLogStocktaking[]
 }

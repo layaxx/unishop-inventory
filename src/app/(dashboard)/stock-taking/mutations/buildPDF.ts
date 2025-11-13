@@ -24,6 +24,7 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 \\usepackage{multirow}
 \\usepackage{tabularx}
 \\usepackage{longtable}
+\\usepackage{needspace}
 \\usepackage{ltablex}
 \\keepXColumns
 
@@ -74,18 +75,19 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 
 ###TABLE###
 
-\\begin{minipage}[t][3cm][t]{6cm}%
-  \\hrulefill                           \\\\\\textit{Ort, Unterschrift}
-\\end{minipage}\\hfill
+\\section*{Abschlussbemerkung}
+Die vorliegende Inventur basiert auf einer händischen Zählung der Bestände zum Stichtag. Die erfassten Mengen spiegeln den aktuellen Stand der Lagerbestände wider.
+
+Trotz größter Sorgfalt bei der Zählung können leichte Abweichungen nicht vollständig ausgeschlossen werden.
 
 \\end{document}
 `
 
-const BuildPDFSchema = z.object({ locationId: z.number().min(0) })
+const BuildPDFSchema = z.object({ locationIds: z.array(z.number().min(1)).min(1) })
 
-const buildTables = async (locationId: number) => {
+const buildTables = async (locationIds: number[]) => {
   const stockData = await db.stockLevel.findMany({
-    where: { locationId },
+    where: { locationId: locationIds[0] },
     include: {
       variant: {
         include: {
@@ -116,14 +118,32 @@ const buildTables = async (locationId: number) => {
   // sort by product name
   data.sort((a, b) => a[0].localeCompare(b[0]))
 
-  const locationName =
-    (await db.location.findUnique({ where: { id: locationId } }))?.name || "Unbekannt"
+  const allLocations = await db.location.findMany({ where: { id: { in: locationIds } } })
+
+  const locationNames: Record<number, string> = {}
+  for (const loc of allLocations) {
+    locationNames[loc.id] = loc.name
+  }
+
+  const allStockData = await db.stockLevel.findMany({
+    where: { locationId: { in: locationIds } },
+  })
 
   for (const [product, variants] of data) {
     // Collect modifier types used only in this product
     latex += buildProductTable(
       variants.map((variant) => {
-        return { ...variant, quantity: { [locationName]: variant.quantity } }
+        return {
+          ...variant,
+          quantity: Object.fromEntries(
+            locationIds.map((locId) => {
+              const stockEntry = allStockData.find(
+                (s) => s.variantId === variant.variantId && s.locationId === locId
+              )
+              return [locationNames[locId], stockEntry ? stockEntry.quantity : -99]
+            })
+          ),
+        }
       }),
       product
     )
@@ -136,7 +156,7 @@ export default resolver.pipe(
   resolver.zod(BuildPDFSchema),
   resolver.authorize(),
   async (data, ctx) => {
-    const latexText = template.replace("###TABLE###", await buildTables(data.locationId))
+    const latexText = template.replace("###TABLE###", await buildTables(data.locationIds))
 
     // render latex to pdf
     return await renderToPDF(latexText)

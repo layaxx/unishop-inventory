@@ -1,0 +1,8 @@
+-- CreateTable
+CREATE TABLE "PDF" (
+    "id" SERIAL NOT NULL,
+    "data" BYTEA NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "PDF_pkey" PRIMARY KEY ("id")
+);
