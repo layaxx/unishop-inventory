@@ -17,7 +17,7 @@ export default resolver.pipe(resolver.zod(MovementSchema), resolver.authorize(),
   }
 
   await db.$transaction(async (tx) => {
-    await tx.movement.createMany({
+    const movements = await tx.movement.createManyAndReturn({
       data: input.variants.map((variant) => ({
         fromId: input.from === -1 ? null : input.from,
         toId: input.to === -1 ? null : input.to,
@@ -25,6 +25,13 @@ export default resolver.pipe(resolver.zod(MovementSchema), resolver.authorize(),
         variantId: variant.id,
         quantity: variant.quantity,
       })),
+    })
+
+    await tx.movementBatch.create({
+      data: {
+        reason: input.reason,
+        movements: { connect: movements.map((movement) => ({ id: movement.id })) },
+      },
     })
 
     if (input.to !== -1) {

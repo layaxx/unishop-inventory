@@ -19,7 +19,7 @@ const AddMovement = () => {
   return (
     <>
       <Formik
-        initialValues={{ from: -1, to: -1, variants: [{ id: -1, quantity: 0 }] }}
+        initialValues={{ reason: "", from: -1, to: -1, variants: [{ id: -1, quantity: 0 }] }}
         validate={validateZodSchema(MovementSchema)}
         onSubmit={async (values, formik) => {
           if (values.from === values.to) {
@@ -58,6 +58,10 @@ const AddMovement = () => {
                 <p>To</p>
                 <LocationSelector label="to" name="to" />
               </div>
+            </div>
+
+            <div className="w-96 mb-4">
+              <LabeledTextField label="Reason" name="reason" type="text" />
             </div>
 
             <FieldArray
