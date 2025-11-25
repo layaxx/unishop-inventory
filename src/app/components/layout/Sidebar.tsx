@@ -16,6 +16,7 @@ import { useQuery } from "@blitzjs/rpc"
 import { NavProjects } from "./NavProjects"
 import getProducts from "../../(dashboard)/products/queries/getProducts"
 import getLocations from "../../(dashboard)/locations/queries/getLocations"
+import { NavMovements } from "./NavMovement"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [products] = useQuery(getProducts, { take: 5 })
@@ -58,6 +59,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ]}
         />
         <NavProjects />
+        <NavMovements />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

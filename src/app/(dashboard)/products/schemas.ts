@@ -38,3 +38,8 @@ export const DeleteProductModifierValueSchema = z.object({
 export const DeleteProductModifierTypeSchema = z.object({
   id: z.number(),
 })
+
+export const GetStockLevelSchema = z.object({
+  variantId: z.number(),
+  locationId: z.number(),
+})
