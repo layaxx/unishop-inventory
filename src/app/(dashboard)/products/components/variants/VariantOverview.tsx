@@ -3,6 +3,7 @@ import { FC } from "react"
 import getProductVariants from "../../queries/getProductVariants"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
 import { DataTable } from "@/src/app/components/DataTable"
+import getLocations from "../../../locations/queries/getLocations"
 
 const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
   const [types] = useQuery(getProductModifierTypes, { productId })
@@ -10,6 +11,7 @@ const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
     where: { productId },
     include: { modifierValues: true, stockLevels: true },
   })
+  const [locations] = useQuery(getLocations, { take: 100 })
 
   return (
     <div className="mt-4">
@@ -25,6 +27,10 @@ const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
 
             const obj: Record<string, string | number> = {
               totalStock,
+            }
+            for (const location of locations?.locations ?? []) {
+              const level = stockLevels.find((sl: any) => sl.locationId === location.id)
+              obj["loc" + location.id] = level ? level.quantity : -999
             }
 
             for (const type of types ?? []) {
@@ -55,6 +61,10 @@ const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
                 },
               ]
             : []),
+          ...(locations?.locations.map((location) => ({
+            accessorKey: `loc${location.id}`,
+            header: `Stock (${location.name})`,
+          })) ?? []),
           {
             accessorKey: "totalStock",
             header: "Stock (total)",
