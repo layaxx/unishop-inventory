@@ -17,6 +17,7 @@ import { NavProjects } from "./NavProjects"
 import getProducts from "../../(dashboard)/products/queries/getProducts"
 import getLocations from "../../(dashboard)/locations/queries/getLocations"
 import { NavMovements } from "./NavMovement"
+import NavReports from "./NavReports"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [products] = useQuery(getProducts, { take: 5 })
@@ -58,8 +59,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             },
           ]}
         />
-        <NavProjects />
         <NavMovements />
+        <NavProjects />
+        <NavReports />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

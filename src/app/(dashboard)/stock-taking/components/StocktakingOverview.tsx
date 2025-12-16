@@ -15,7 +15,7 @@ import Link from "next/link"
 import getLastStocktakingProcesses from "../queries/getLastStocktakingProcesses"
 import dayjs from "dayjs"
 import CombinedPDF from "./CombinedPDF"
-import PastReports from "./PastReports"
+import PastReports from "../../reports/components/PastReports"
 
 const StocktakingOverview = () => {
   const [inventoryEntries] = useQuery(getInventoryEntries, {})

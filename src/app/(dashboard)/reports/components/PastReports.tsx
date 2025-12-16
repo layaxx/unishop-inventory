@@ -1,5 +1,5 @@
 import { useQuery } from "@blitzjs/rpc"
-import getPastStocktakingReports from "../queries/getPastStocktakingReports"
+import getPastStocktakingReports from "../../stock-taking/queries/getPastStocktakingReports"
 
 const PastReports = () => {
   const [reports] = useQuery(getPastStocktakingReports, {})

@@ -1,5 +1,5 @@
 import { resolver } from "@blitzjs/rpc"
-import { z } from "zod"
+import { late, z } from "zod"
 import fs from "node:fs/promises"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
@@ -7,6 +7,8 @@ import { exec } from "node:child_process"
 import db from "@/db"
 import { promisify } from "node:util"
 import { buildProductTable } from "@/lib/pdf/productTable"
+import { buildCompactProductsTable } from "@/lib/pdf/compactTable"
+import dayjs from "dayjs"
 
 const execAsync = promisify(exec)
 
@@ -60,7 +62,7 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 \\begin{minipage}{0.6\\textwidth} % Center of title section
   \\centering
   \\huge % Title text size
-  Inventur am \\today{}\\\\ % Assignment title and number
+  ###TITLE###\\\\
   \\normalsize % Subtitle text size
   UniShop Bamberg\\\\ % Assignment subtitle
 \\end{minipage}
@@ -73,17 +75,80 @@ const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class i
 \\end{minipage}
 \\bigskip 
 
+###COMPACT-TABLE###
+
 ###TABLE###
 
-\\section*{Abschlussbemerkung}
-Die vorliegende Inventur basiert auf einer händischen Zählung der Bestände zum Stichtag. Die erfassten Mengen spiegeln den aktuellen Stand der Lagerbestände wider.
-
-Trotz größter Sorgfalt bei der Zählung können leichte Abweichungen nicht vollständig ausgeschlossen werden.
+###FINAL-WORDS###
 
 \\end{document}
 `
 
-const BuildPDFSchema = z.object({ locationIds: z.array(z.number().min(1)).min(1) })
+const BuildPDFSchema = z.object({
+  locationIds: z.array(z.number().min(1)).min(1),
+  includeCompact: z.boolean().optional(),
+  directFromStockTaking: z.boolean().optional(),
+})
+
+const buildCompactTable = async (locationIds: number[]) => {
+  const stockData = await db.stockLevel.findMany({
+    where: { locationId: locationIds[0] },
+    include: {
+      variant: {
+        include: {
+          product: { select: { name: true } },
+          modifierValues: {
+            include: { modifierType: { select: { name: true } } },
+          },
+        },
+      },
+    },
+  })
+
+  if (stockData.length === 0) {
+    return "% No stock data available\n"
+  }
+
+  // Group by product
+  const grouped: Record<string, typeof stockData> = {}
+  for (const s of stockData) {
+    const pName = s.variant.product.name
+    if (!grouped[pName]) grouped[pName] = []
+    grouped[pName].push(s)
+  }
+
+  const data = Object.entries(grouped)
+  // sort by product name
+  data.sort((a, b) => a[0].localeCompare(b[0]))
+
+  const allLocations = await db.location.findMany({ where: { id: { in: locationIds } } })
+
+  const locationNames: Record<number, string> = {}
+  for (const loc of allLocations) {
+    locationNames[loc.id] = loc.name
+  }
+
+  const allStockData = await db.stockLevel.findMany({
+    where: { locationId: { in: locationIds } },
+  })
+
+  return buildCompactProductsTable(
+    data.map(([product, variants]) => {
+      return {
+        product,
+        quantity: Object.fromEntries(
+          locationIds.map((locId) => {
+            const stockEntries = allStockData.filter(
+              (s) => variants.some((v) => v.variantId === s.variantId) && s.locationId === locId
+            )
+            const quantity = stockEntries.reduce((sum, entry) => sum + entry.quantity, 0)
+            return [locationNames[locId], quantity]
+          })
+        ),
+      }
+    })
+  ).trim()
+}
 
 const buildTables = async (locationIds: number[]) => {
   const stockData = await db.stockLevel.findMany({
@@ -152,16 +217,73 @@ const buildTables = async (locationIds: number[]) => {
   return latex.trim()
 }
 
-export default resolver.pipe(
-  resolver.zod(BuildPDFSchema),
-  resolver.authorize(),
-  async (data, ctx) => {
-    const latexText = template.replace("###TABLE###", await buildTables(data.locationIds))
+export default resolver.pipe(resolver.zod(BuildPDFSchema), resolver.authorize(), async (data) => {
+  let latexText = template
 
-    // render latex to pdf
-    return await renderToPDF(latexText)
+  if (data.directFromStockTaking) {
+    latexText = latexText.replace("###TITLE###", "Inventur am \\today{}")
+    latexText = latexText.replace(
+      "###FINAL-WORDS###",
+      `\\section*{Abschlussbemerkung}
+Die vorliegende Inventur basiert auf einer händischen Zählung der Bestände zum Stichtag. Die erfassten Mengen spiegeln den aktuellen Stand der Lagerbestände wider.
+
+Trotz größter Sorgfalt bei der Zählung können leichte Abweichungen nicht vollständig ausgeschlossen werden.
+`
+    )
+  } else {
+    latexText = latexText.replace("###TITLE###", "Inventarstand \\today{}")
+
+    const latestPerLocation = await db.auditLogStocktaking.groupBy({
+      by: ["locationId"],
+      where: { success: true },
+      _max: {
+        createdAt: true,
+      },
+    })
+
+    const audits = await db.auditLogStocktaking.findMany({
+      where: {
+        OR: latestPerLocation
+          .filter((x) => x._max.createdAt)
+          .map((x) => ({
+            locationId: x.locationId,
+            createdAt: x._max.createdAt!,
+          })),
+      },
+      select: { locationId: true, createdAt: true, id: true },
+    })
+
+    const firstDay = dayjs(audits[0].createdAt)
+    const allSameDay = audits?.every((audit) => {
+      const auditDate = dayjs(audit.createdAt)
+      return auditDate.isSame(firstDay, "day")
+    })
+
+    const lastFullStocktakingDate = allSameDay
+      ? dayjs(audits[0].createdAt).format("DD.MM.YYYY")
+      : "einem früheren Datum"
+
+    latexText = latexText.replace(
+      "###FINAL-WORDS###",
+      `\\section*{Abschlussbemerkung}
+Der vorliegende Bericht basiert auf einer händische Zählung vom ${lastFullStocktakingDate} abzüglich seitdem aufgezeichneter Verkäufe.
+
+Trotz größter Sorgfalt können Abweichungen nicht vollständig ausgeschlossen werden.
+`
+    )
   }
-)
+
+  if (data.includeCompact) {
+    latexText = latexText.replace("###COMPACT-TABLE###", await buildCompactTable(data.locationIds))
+  } else {
+    latexText = latexText.replace("###COMPACT-TABLE###", "%\n")
+  }
+
+  latexText = latexText.replace("###TABLE###", await buildTables(data.locationIds))
+
+  // render latex to pdf
+  return await renderToPDF(latexText)
+})
 
 async function renderToPDF(latexText: string): Promise<Buffer> {
   const tmpDirectory = await fs.mkdtemp(join(tmpdir(), "latex-inventory"))
