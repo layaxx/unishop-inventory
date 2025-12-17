@@ -4,10 +4,11 @@ import { withBlitzAuth } from "@/src/app/blitz-server"
 import dayjs from "dayjs"
 import { NextResponse } from "next/server"
 
-// TODO: authenticate all API routes!
-
 export const { GET } = withBlitzAuth({
   GET: async (_request, _params, ctx) => {
+    if (!ctx.session.$isAuthorized()) {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
     const allLocations = (await db.location.findMany()).map((loc) => loc.id)
     let report
     try {

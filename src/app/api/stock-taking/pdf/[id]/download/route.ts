@@ -1,23 +1,33 @@
 import db from "@/db"
+import { withBlitzAuth } from "@/src/app/blitz-server"
 import { NextResponse } from "next/server"
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const param = await params
+export const { GET } = withBlitzAuth({
+  GET: async (_request, params, ctx) => {
+    if (!ctx.session.$isAuthorized()) {
+      return new NextResponse("Unauthorized", { status: 401 })
+    }
+    const { id } = await params.params
 
-  const report = await db.pDF.findUnique({
-    where: { id: Number(param.id) },
-  })
+    if (!id || Number.isNaN(Number(id))) {
+      return new NextResponse("Missing or invalid id", { status: 403 })
+    }
 
-  if (!report?.data) {
-    return new NextResponse("No PDF found", { status: 404 })
-  }
+    const report = await db.pDF.findUnique({
+      where: { id: Number(id) },
+    })
 
-  const pdfBuffer = Buffer.isBuffer(report.data) ? report.data : Buffer.from(report.data as any)
-  const body = new Uint8Array(pdfBuffer)
-  return new NextResponse(body, {
-    headers: {
-      "Content-Type": "application/pdf",
-      "Content-Disposition": 'attachment; filename="report.pdf"',
-    },
-  })
-}
+    if (!report?.data) {
+      return new NextResponse("No PDF found", { status: 404 })
+    }
+
+    const pdfBuffer = Buffer.isBuffer(report.data) ? report.data : Buffer.from(report.data as any)
+    const body = new Uint8Array(pdfBuffer)
+    return new NextResponse(body, {
+      headers: {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'attachment; filename="report.pdf"',
+      },
+    })
+  },
+})
