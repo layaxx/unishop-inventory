@@ -21,10 +21,6 @@ export const Login = z.object({
   password: z.string(),
 })
 
-export const ForgotPassword = z.object({
-  email,
-})
-
 export const ResetPassword = z
   .object({
     password: password,

@@ -8,9 +8,10 @@ import { validateZodSchema } from "blitz"
 import { Formik, Form, FieldArray } from "formik"
 import { useState } from "react"
 import { MovementSchema } from "../schemas"
-import { useMutation } from "@blitzjs/rpc"
+import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import addMovementMutation from "../mutations/addMovement"
 import CurrentStockLevel from "./CurrentStockLevel"
+import getRecentMovements from "../queries/getRecentMovements"
 
 const AddMovement = () => {
   const [formError, setFormError] = useState<string | null>(null)
@@ -30,6 +31,7 @@ const AddMovement = () => {
           try {
             await addMovement(values)
             formik.resetForm()
+            invalidateQuery(getRecentMovements)
           } catch (error) {
             setFormError((error as Error).message)
             return

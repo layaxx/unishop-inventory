@@ -61,9 +61,6 @@ export const LoginForm = (props: LoginFormProps) => {
                 placeholder="Password"
                 type="password"
               />
-              <div>
-                <Link href={"/forgot-password"}>Forgot your password?</Link>
-              </div>
             </CardContent>
           </Card>
         </div>
