@@ -23,7 +23,7 @@ export const SignupForm = () => {
         onSubmit={async (values) => {
           console.log("Signing up", values)
           try {
-            const result = await signupMutation(values)
+            await signupMutation(values)
             router.refresh()
             router.push("/")
           } catch (error: any) {

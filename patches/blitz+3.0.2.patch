@@ -1,0 +1,24 @@
+diff --git a/node_modules/blitz/dist/chunks/codegen-tasks.cjs b/node_modules/blitz/dist/chunks/codegen-tasks.cjs
+index 3f973da..f0d5fa5 100644
+--- a/node_modules/blitz/dist/chunks/codegen-tasks.cjs
++++ b/node_modules/blitz/dist/chunks/codegen-tasks.cjs
+@@ -89,6 +89,7 @@ const codegenTasks = () => __async(void 0, null, function* () {
+       nextDir,
+       "../..",
+       "client",
++      "react-client-callbacks",
+       "on-recoverable-error.js"
+     );
+     const readFile = yield fs__default.readFile(nextClientIndex);
+diff --git a/node_modules/blitz/dist/chunks/codegen-tasks.mjs b/node_modules/blitz/dist/chunks/codegen-tasks.mjs
+index e54d850..1bd770a 100644
+--- a/node_modules/blitz/dist/chunks/codegen-tasks.mjs
++++ b/node_modules/blitz/dist/chunks/codegen-tasks.mjs
+@@ -80,6 +80,7 @@ const codegenTasks = () => __async(void 0, null, function* () {
+       nextDir,
+       "../..",
+       "client",
++      "react-client-callbacks",
+       "on-recoverable-error.js"
+     );
+     const readFile = yield fs.readFile(nextClientIndex);
