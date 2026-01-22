@@ -2,8 +2,6 @@ import db from "db"
 import { SecurePassword } from "@blitzjs/auth/secure-password"
 
 export default async function signup(input: { password: string; email: string }, ctx: any) {
-  throw new Error("Signup is disabled") // TODO: Remove this line to enable signup
-
   const blitzContext = ctx
   const hashedPassword = await SecurePassword.hash(input.password as string)
   const email = input.email as string

@@ -9,13 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 
 export const SignupForm = () => {
-  const [signupMutation] = useMutation(signup)
+  const [signupMutation] = useMutation(signup, { throwOnError: false })
   const router = useRouter()
 
   return (
     <div>
-      <h1>Create an Account</h1>
-
       <Form
         submitText="Create Account"
         schema={Signup}

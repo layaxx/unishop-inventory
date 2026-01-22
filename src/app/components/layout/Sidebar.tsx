@@ -1,64 +1,49 @@
 "use client"
 
-import { Shirt, Warehouse } from "lucide-react"
-
-import { NavMain } from "./NavMain"
-import { NavUser } from "./NavUser"
 import { TopNav } from "./TopNav"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenuButton,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { useQuery } from "@blitzjs/rpc"
 import { NavProjects } from "./NavProjects"
-import getProducts from "../../(dashboard)/products/queries/getProducts"
-import getLocations from "../../(dashboard)/locations/queries/getLocations"
 import { NavMovements } from "./NavMovement"
 import NavReports from "./NavReports"
+import { Suspense } from "react"
+import ProdLocNav from "./ProdLocNav"
+import dynamic from "next/dynamic"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ChevronsUpDown } from "lucide-react"
+
+const NavUser = dynamic(() => import("./NavUser").then((mod) => mod.NavUser), {
+  ssr: false,
+  loading() {
+    return (
+      <SidebarMenuButton size="lg" className="">
+        <Avatar className="h-8 w-8 rounded-lg">
+          <AvatarFallback className="rounded-lg">-</AvatarFallback>
+        </Avatar>
+        <div className="grid flex-1 text-left text-sm leading-tight animate-pulse">
+          <span className="h-4 bg-neutral-300 truncate font-medium"></span>
+          <span className="h-4 bg-neutral-300 truncate text-xs"></span>
+        </div>
+        <ChevronsUpDown className="ml-auto size-4" />
+      </SidebarMenuButton>
+    )
+  },
+})
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [products] = useQuery(getProducts, { take: 5 })
-  const [locations] = useQuery(getLocations, { take: 10 })
-
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TopNav />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain
-          items={[
-            {
-              title: "Products",
-              url: "/products",
-              icon: Shirt,
-              isActive: true,
-              items: [
-                ...(products?.products.map((product) => ({
-                  title: product.name,
-                  url: `/products/${product.id}`,
-                })) ?? []),
-                { title: "all products...", url: "/products" },
-              ],
-            },
-            {
-              title: "Locations",
-              url: "/locations",
-              icon: Warehouse,
-              isActive: true,
-              items: [
-                ...(locations?.locations.map((location) => ({
-                  title: location.name,
-                  url: `/locations/${location.id}`,
-                })) ?? []),
-                { title: "all locations...", url: "/locations" },
-              ],
-            },
-          ]}
-        />
+        <ProdLocNav />
         <NavMovements />
         <NavProjects />
         <NavReports />

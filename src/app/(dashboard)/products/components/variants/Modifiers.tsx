@@ -1,3 +1,5 @@
+"use client"
+
 import { invalidateQuery, useMutation, useQuery } from "@blitzjs/rpc"
 import { FC } from "react"
 import AddModifier from "./AddModifier"
@@ -16,12 +18,25 @@ import { Button } from "@/components/ui/button"
 import deleteProductModifierValueMutation from "../../mutations/deleteProductModifierValue"
 import deleteProductModifierTypeMutation from "../../mutations/deleteProductModifierType"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  ProductModifierType,
+  ProductModifierValue,
+  ProductVariant,
+  StockLevel,
+} from "@prisma/client"
 
-const Modifiers: FC<{ productId: number }> = ({ productId }) => {
-  const [types, { isLoading }] = useQuery(getProductModifierTypes, {
-    productId,
-  })
-
+const Modifiers: FC<{
+  types: Array<
+    ProductModifierType & {
+      values: Array<
+        ProductModifierValue & {
+          ProductVariant: Array<ProductVariant & { stockLevels: StockLevel[] }>
+        }
+      >
+    }
+  >
+  productId: number
+}> = ({ types, productId }) => {
   const [deleteProductModifierValue] = useMutation(deleteProductModifierValueMutation)
   const [deleteProductModifierType] = useMutation(deleteProductModifierTypeMutation)
 
@@ -49,10 +64,6 @@ const Modifiers: FC<{ productId: number }> = ({ productId }) => {
     } catch (error) {
       console.error("Failed to delete modifier value:", error)
     }
-  }
-
-  if (isLoading) {
-    return <div>Loading variants...</div>
   }
 
   return (

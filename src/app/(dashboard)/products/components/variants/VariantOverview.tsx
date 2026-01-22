@@ -1,24 +1,20 @@
-import { useQuery } from "@blitzjs/rpc"
+"use client"
+
 import { FC } from "react"
-import getProductVariants from "../../queries/getProductVariants"
-import getProductModifierTypes from "../../queries/getProductModifierTypes"
 import { DataTable } from "@/src/app/components/DataTable"
-import getLocations from "../../../locations/queries/getLocations"
+import { ProductModifierType, ProductVariant, Location } from "@prisma/client"
 
-const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
-  const [types] = useQuery(getProductModifierTypes, { productId })
-  const [variants] = useQuery(getProductVariants, {
-    where: { productId },
-    include: { modifierValues: true, stockLevels: true },
-  })
-  const [locations] = useQuery(getLocations, { take: 100 })
-
+const VariantOverview: FC<{
+  locations: Location[]
+  types: ProductModifierType[]
+  variants: ProductVariant[]
+}> = ({ locations, types, variants }) => {
   return (
     <div className="mt-4">
       <h2 className="font-bold text-4xl">Variants</h2>
       <DataTable
         data={
-          variants?.productVariants.map((x) => {
+          variants.map((x) => {
             const stockLevels = Array.isArray((x as any).stockLevels) ? (x as any).stockLevels : []
             const totalStock = stockLevels.reduce(
               (acc: number, level: any) => acc + (level?.quantity ?? 0),
@@ -28,7 +24,7 @@ const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
             const obj: Record<string, string | number> = {
               totalStock,
             }
-            for (const location of locations?.locations ?? []) {
+            for (const location of locations ?? []) {
               const level = stockLevels.find((sl: any) => sl.locationId === location.id)
               obj["loc" + location.id] = level ? level.quantity : -999
             }
@@ -61,7 +57,7 @@ const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
                 },
               ]
             : []),
-          ...(locations?.locations.map((location) => ({
+          ...(locations.map((location) => ({
             accessorKey: `loc${location.id}`,
             header: `Stock (${location.name})`,
           })) ?? []),

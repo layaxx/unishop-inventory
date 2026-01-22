@@ -1,8 +1,13 @@
 import { Metadata } from "next"
-import { Suspense } from "react"
 import { invoke } from "src/app/blitz-server"
 import getProduct from "../queries/getProduct"
-import { Product } from "../components/Product"
+import Link from "next/link"
+import Modifiers from "../components/variants/Modifiers"
+import VariantOverview from "../components/variants/VariantOverview"
+import getProductModifierTypes from "../queries/getProductModifierTypes"
+import getProductVariants from "../queries/getProductVariants"
+import getLocations from "../../locations/queries/getLocations"
+import DeleteLink from "../components/DeleteLink"
 
 export async function generateMetadata(props: ProductPageProps): Promise<Metadata> {
   const params = await props.params
@@ -18,11 +23,38 @@ type ProductPageProps = {
 
 export default async function Page(props: ProductPageProps) {
   const params = await props.params
+
+  const product = await invoke(getProduct, { id: Number(params.productId) })
+
+  const types = await invoke(getProductModifierTypes, {
+    productId: Number(params.productId),
+  })
+
+  const variants = await invoke(getProductVariants, {
+    where: { productId: Number(params.productId) },
+    include: { modifierValues: true, stockLevels: true },
+  })
+  const locations = await invoke(getLocations, { take: 100 })
+
   return (
     <div>
-      <Suspense fallback={<div>Loading...</div>}>
-        <Product productId={Number(params.productId)} />
-      </Suspense>
+      <div>
+        <h1 className="text-5xl font-bold">{product.name}</h1>
+        <p>Product {product.id}</p>
+        <p>{product.description}</p>
+
+        {product.image && <img src={product.image} alt={product.name} width={200} />}
+
+        <Link href={`/products/${product.id}/edit`}>Edit</Link>
+        <DeleteLink productId={product.id} />
+
+        <Modifiers types={types} productId={product.id} />
+        <VariantOverview
+          locations={locations.locations}
+          types={types}
+          variants={variants.productVariants}
+        />
+      </div>
     </div>
   )
 }

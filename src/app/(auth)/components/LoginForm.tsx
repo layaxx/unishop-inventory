@@ -17,7 +17,7 @@ type LoginFormProps = {
 }
 
 export const LoginForm = (props: LoginFormProps) => {
-  const [loginMutation] = useMutation(login)
+  const [loginMutation] = useMutation(login, { throwOnError: false })
   const router = useRouter()
   const next = useSearchParams()?.get("next")
   return (

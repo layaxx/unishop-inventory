@@ -7,10 +7,12 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { ErrorBoundary } from "@blitzjs/next"
 import { Separator } from "@radix-ui/react-separator"
 import { Plus } from "lucide-react"
 import Link from "next/link"
 import { FC, Fragment, PropsWithChildren } from "react"
+import Error from "../../error"
 
 const Breadcrumbs: FC<
   PropsWithChildren<{ page: string; pre: Array<{ name: string; url: string }>; createNew?: string }>
@@ -49,7 +51,9 @@ const Breadcrumbs: FC<
         </Breadcrumb>
       </div>
     </header>
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+      <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
+    </div>
   </>
 )
 
