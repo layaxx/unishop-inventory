@@ -1,49 +1,54 @@
 import { Metadata } from "next"
+import { notFound } from "next/navigation"
 import { invoke } from "src/app/blitz-server"
-import getProduct from "../queries/getProduct"
+import Image from "next/image"
 import Link from "next/link"
-import Modifiers from "../components/variants/Modifiers"
-import VariantOverview from "../components/variants/VariantOverview"
+
+import getProduct from "../queries/getProduct"
 import getProductModifierTypes from "../queries/getProductModifierTypes"
 import getProductVariants from "../queries/getProductVariants"
 import getLocations from "../../locations/queries/getLocations"
-import DeleteLink from "../components/DeleteLink"
 
-export async function generateMetadata(props: ProductPageProps): Promise<Metadata> {
-  const params = await props.params
-  if (!params.productId || isNaN(Number(params.productId))) {
-    return {
-      title: "Product - Unknown",
-    }
-  }
-  const product = await invoke(getProduct, { id: Number(params.productId) })
-  return {
-    title: `Product ${product.id} - ${product.name}`,
-  }
-}
+import Modifiers from "../components/variants/Modifiers"
+import VariantOverview from "../components/variants/VariantOverview"
+import DeleteLink from "../components/DeleteLink"
 
 type ProductPageProps = {
   params: Promise<{ productId: string }>
 }
 
-export default async function Page(props: ProductPageProps) {
-  const params = await props.params
+export async function generateMetadata(props: ProductPageProps): Promise<Metadata> {
+  const { productId } = await props.params
+  const id = parseInt(productId)
 
-  if (!params.productId) {
-    return <div>Product ID is required</div>
+  if (isNaN(id)) return { title: "Product Not Found" }
+
+  try {
+    const product = await invoke(getProduct, { id })
+    return { title: `${product.name}` }
+  } catch {
+    return { title: "Product Not Found" }
   }
+}
 
-  const product = await invoke(getProduct, { id: 1 })
+export default async function Page(props: ProductPageProps) {
+  const { productId } = await props.params
+  const id = parseInt(productId)
 
-  const types = await invoke(getProductModifierTypes, {
-    productId: Number(params.productId),
-  })
+  if (isNaN(id)) notFound()
 
-  const variants = await invoke(getProductVariants, {
-    where: { productId: Number(params.productId) },
-    include: { modifierValues: true, stockLevels: true },
-  })
-  const locations = await invoke(getLocations, { take: 100 })
+  // Fetch all data in parallel
+  const [product, types, variants, locations] = await Promise.all([
+    invoke(getProduct, { id }),
+    invoke(getProductModifierTypes, { productId: id }),
+    invoke(getProductVariants, {
+      where: { productId: id },
+      include: { modifierValues: true, stockLevels: true },
+    }),
+    invoke(getLocations, { take: 100 }),
+  ]).catch(() => [null, null, null, null])
+
+  if (!product) notFound()
 
   return (
     <div>
@@ -57,11 +62,11 @@ export default async function Page(props: ProductPageProps) {
         <Link href={`/products/${product.id}/edit`}>Edit</Link>
         <DeleteLink productId={product.id} />
 
-        <Modifiers types={types} productId={product.id} />
+        <Modifiers types={types ?? []} productId={product.id} />
         <VariantOverview
-          locations={locations.locations}
-          types={types}
-          variants={variants.productVariants}
+          locations={locations?.locations ?? []}
+          types={types ?? []}
+          variants={variants?.productVariants ?? []}
         />
       </div>
     </div>
