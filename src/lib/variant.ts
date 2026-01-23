@@ -1,4 +1,4 @@
-import { ProductModifierValue } from "@prisma/client"
+import type { ProductModifierValue } from "db"
 
 export function getName(variant: any) {
   if (variant.modifierValues.length === 0) {

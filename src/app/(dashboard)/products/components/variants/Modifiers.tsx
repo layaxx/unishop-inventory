@@ -18,14 +18,9 @@ import { Button } from "@/components/ui/button"
 import deleteProductModifierValueMutation from "../../mutations/deleteProductModifierValue"
 import deleteProductModifierTypeMutation from "../../mutations/deleteProductModifierType"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  ProductModifierType,
-  ProductModifierValue,
-  ProductVariant,
-  StockLevel,
-} from "@prisma/client"
+import type { ProductModifierType, ProductModifierValue, ProductVariant, StockLevel } from "db"
 
-const Modifiers: FC<{
+type Props = {
   types: Array<
     ProductModifierType & {
       values: Array<
@@ -36,7 +31,9 @@ const Modifiers: FC<{
     }
   >
   productId: number
-}> = ({ types, productId }) => {
+}
+
+const Modifiers: FC<Props> = ({ types, productId }) => {
   const [deleteProductModifierValue] = useMutation(deleteProductModifierValueMutation)
   const [deleteProductModifierType] = useMutation(deleteProductModifierTypeMutation)
 
