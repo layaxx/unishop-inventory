@@ -9500,6 +9500,7 @@ __metadata:
     lint-staged: "npm:13.0.3"
     lucide-react: "npm:0.562.0"
     next: "npm:15.4.10"
+    nextjs-toploader: "npm:^3.9.17"
     node-mocks-http: "npm:1.17.2"
     postcss: "npm:8.5.6"
     postinstall-postinstall: "npm:2.1.0"
@@ -11356,6 +11357,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nextjs-toploader@npm:^3.9.17":
+  version: 3.9.17
+  resolution: "nextjs-toploader@npm:3.9.17"
+  dependencies:
+    nprogress: "npm:^0.2.0"
+    prop-types: "npm:^15.8.1"
+  peerDependencies:
+    next: ">= 6.0.0"
+    react: ">= 16.0.0"
+    react-dom: ">= 16.0.0"
+  checksum: 10c0/5899c0ad26fcd5241de075c773c320c98b3c59b1132164e5b9350262018225fc1d34af51cb2859ccd3c16f9f2434f46fb25dc6b54a1bd173350f0e56bac2b41d
+  languageName: node
+  linkType: hard
+
 "nice-try@npm:^1.0.4":
   version: 1.0.5
   resolution: "nice-try@npm:1.0.5"
@@ -11527,6 +11542,13 @@ __metadata:
   bin:
     npm-which: bin/npm-which.js
   checksum: 10c0/62cb640d5d12cda5033e5431f02fd3b3231f7fcdd17939ca18dff0b18b4e0fecc6cc0a83c6e9c2c93d51ca90e34ed8cca21eca2bfd50448be68570399aee62c0
+  languageName: node
+  linkType: hard
+
+"nprogress@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "nprogress@npm:0.2.0"
+  checksum: 10c0/eab9a923a1ad1eed71a455ecfbc358442dd9bcd71b9fa3fa1c67eddf5159360b182c218f76fca320c97541a1b45e19ced04e6dcb044a662244c5419f8ae9e821
   languageName: node
   linkType: hard
 

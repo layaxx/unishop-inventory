@@ -3,7 +3,7 @@ import { Suspense } from "react"
 import { UpdateProductSchema } from "../schemas"
 import { FORM_ERROR, ProductForm } from "./ProductForm"
 import { useMutation, useQuery } from "@blitzjs/rpc"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import getProduct from "../queries/getProduct"
 import updateProduct from "../mutations/updateProduct"
 

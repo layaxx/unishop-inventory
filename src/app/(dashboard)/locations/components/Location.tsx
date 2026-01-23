@@ -1,7 +1,7 @@
 "use client"
 import { useMutation, useQuery } from "@blitzjs/rpc"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import deleteLocation from "../mutations/deleteLocation"
 import getLocation from "../queries/getLocation"
 

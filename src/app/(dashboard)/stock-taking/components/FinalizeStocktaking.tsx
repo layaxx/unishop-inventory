@@ -4,7 +4,7 @@ import { FC } from "react"
 import getUntrackedVariants from "../queries/getUntrackedVariants"
 import getLocation from "../../locations/queries/getLocation"
 import finalizeStocktaking from "../mutations/finalizeStocktaking"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import isActiveInventory from "../queries/isActiveInventory"
 
 const FinalizeStocktaking: FC<{ locationId: number }> = ({ locationId }) => {

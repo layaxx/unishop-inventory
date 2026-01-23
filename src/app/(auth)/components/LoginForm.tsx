@@ -7,9 +7,8 @@ import login from "../mutations/login"
 import { Login } from "../validations"
 import { useMutation } from "@blitzjs/rpc"
 import { useSearchParams } from "next/navigation"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import type { Route } from "next"
-import { cn } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 type LoginFormProps = {

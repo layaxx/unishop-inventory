@@ -2,7 +2,7 @@
 
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import deleteProduct from "../mutations/deleteProduct"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import getProductsSimple from "../queries/getProductsSimple"
 import getProducts from "../queries/getProducts"
 

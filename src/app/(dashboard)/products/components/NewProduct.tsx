@@ -2,7 +2,7 @@
 import { FORM_ERROR, ProductForm } from "./ProductForm"
 import { CreateProductSchema } from "../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import createProduct from "../mutations/createProduct"
 import getProducts from "../queries/getProducts"
 import getProductsSimple from "../queries/getProductsSimple"

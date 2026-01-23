@@ -3,7 +3,7 @@ import { FORM_ERROR, LocationForm } from "./LocationForm"
 import { CreateLocationSchema } from "../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import createLocation from "../mutations/createLocation"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import getLocations from "../queries/getLocations"
 
 export function NewLocation() {

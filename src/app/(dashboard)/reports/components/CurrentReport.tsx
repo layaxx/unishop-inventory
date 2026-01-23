@@ -6,7 +6,7 @@ const CurrentReport = () => {
     <>
       <h2 className="mb-4 text-lg font-semibold">Generate Report today</h2>
 
-      <Link download href="/api/reports/generate-current">
+      <Link prefetch={false} download href="/api/reports/generate-current">
         <Button variant="secondary">Download current Report</Button>
       </Link>
     </>

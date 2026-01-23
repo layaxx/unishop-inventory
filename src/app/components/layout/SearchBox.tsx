@@ -9,7 +9,7 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox"
 import { Route } from "next"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { useState } from "react"
 
 export type SearchItem = {

@@ -1,6 +1,6 @@
 "use client"
 import logout from "../mutations/logout"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 import { useMutation } from "@blitzjs/rpc"
 import { Button } from "@/components/ui/button"
 

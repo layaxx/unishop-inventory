@@ -5,7 +5,7 @@ import getLocation from "../queries/getLocation"
 import { UpdateLocationSchema } from "../schemas"
 import { FORM_ERROR, LocationForm } from "./LocationForm"
 import { useMutation, useQuery } from "@blitzjs/rpc"
-import { useRouter } from "next/navigation"
+import { useRouter } from "nextjs-toploader/app"
 
 export const EditLocation = ({ locationId }: { locationId: number }) => {
   const [location, { setQueryData }] = useQuery(
