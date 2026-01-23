@@ -23,7 +23,6 @@ export default function ProdLocNav() {
               title: product.name,
               url: `/products/${product.id}`,
             })) ?? []),
-            { title: "all products...", url: "/products" },
           ],
           searchThrough:
             products?.map((product) => ({

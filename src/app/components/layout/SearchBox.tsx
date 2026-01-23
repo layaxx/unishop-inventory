@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/combobox"
 import { Route } from "next"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 export type SearchItem = {
   id: number
@@ -19,6 +20,8 @@ export type SearchItem = {
 
 export default function SearchBox({ items }: { items: Array<SearchItem> }) {
   const router = useRouter()
+  const [key, setKey] = useState(0)
+
   return (
     <Combobox<SearchItem>
       items={items.map(({ id, title, url }) => ({ label: title, id, url }))}
@@ -26,8 +29,10 @@ export default function SearchBox({ items }: { items: Array<SearchItem> }) {
       onValueChange={(item) => {
         if (item) {
           router.push(item.url)
+          setKey((k) => k + 1)
         }
       }}
+      key={key}
     >
       <ComboboxInput placeholder="Search…" />
       <ComboboxContent>

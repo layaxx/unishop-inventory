@@ -1,8 +1,10 @@
 "use client"
 
-import { useMutation } from "@blitzjs/rpc"
+import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import deleteProduct from "../mutations/deleteProduct"
 import { useRouter } from "next/navigation"
+import getProductsSimple from "../queries/getProductsSimple"
+import getProducts from "../queries/getProducts"
 
 export default function DeleteLink({ productId }: { productId: number }) {
   const router = useRouter()
@@ -14,6 +16,8 @@ export default function DeleteLink({ productId }: { productId: number }) {
       onClick={async () => {
         if (window.confirm("This will be deleted")) {
           await deleteProductMutation({ id: productId })
+          invalidateQuery(getProducts)
+          invalidateQuery(getProductsSimple)
           router.push("/products")
         }
       }}

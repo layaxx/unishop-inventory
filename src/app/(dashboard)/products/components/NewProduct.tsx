@@ -5,6 +5,7 @@ import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import { useRouter } from "next/navigation"
 import createProduct from "../mutations/createProduct"
 import getProducts from "../queries/getProducts"
+import getProductsSimple from "../queries/getProductsSimple"
 
 export function NewProduct() {
   const [createProductMutation] = useMutation(createProduct)
@@ -18,6 +19,7 @@ export function NewProduct() {
         try {
           const product = await createProductMutation(values)
           invalidateQuery(getProducts)
+          invalidateQuery(getProductsSimple)
           router.push(`/products/${product.id}`)
         } catch (error: any) {
           console.error(error)

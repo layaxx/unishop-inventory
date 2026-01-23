@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <Breadcrumbs page="Products" pre={[]}>
+    <Breadcrumbs page="Products" pre={[]} createNew="/products/new">
       <div>
         <p className="underline">
           <Link href="/products/new">Create Product</Link>
