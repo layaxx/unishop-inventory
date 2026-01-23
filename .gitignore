@@ -43,3 +43,5 @@ k18.sql
 both.sql
 202?-??-??.sql
 .yarn/install-state.gz
+
+db/generated/

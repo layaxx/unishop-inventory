@@ -1,0 +1,1433 @@
+diff --git a/dist/chunks/index-browser.cjs b/dist/chunks/index-browser.cjs
+index 7f98ba476552d593596115ddca528497ced310c3..b55fa5cdaaba2eda62a4a8b6cb4acb6abc251ae0 100644
+--- a/dist/chunks/index-browser.cjs
++++ b/dist/chunks/index-browser.cjs
+@@ -1,419 +1,495 @@
+-'use strict';
++"use strict"
+ 
+-const _SuperJson = require('superjson');
+-const index = require('./index.cjs');
+-const spawn = require('cross-spawn');
+-const which = require('npm-which');
++const _SuperJson = require("superjson")
++const index = require("./index.cjs")
++const spawn = require("cross-spawn")
++const which = require("npm-which")
+ 
+-function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e["default"] : e; }
++function _interopDefaultLegacy(e) {
++  return e && typeof e === "object" && "default" in e ? e["default"] : e
++}
+ 
+-const _SuperJson__default = /*#__PURE__*/_interopDefaultLegacy(_SuperJson);
+-const which__default = /*#__PURE__*/_interopDefaultLegacy(which);
++const _SuperJson__default = /*#__PURE__*/ _interopDefaultLegacy(_SuperJson)
++const which__default = /*#__PURE__*/ _interopDefaultLegacy(which)
+ 
+-const SuperJson = "default" in _SuperJson__default ? _SuperJson__default.default : _SuperJson__default;
+-const errorProps = ["name", "message", "code", "statusCode", "meta", "url"];
++const SuperJson =
++  "default" in _SuperJson__default
++    ? _SuperJson__default.default
++    : _SuperJson__default
++const errorProps = ["name", "message", "code", "statusCode", "meta", "url"]
+ if (index.isNotInUserTestEnvironment()) {
+-  SuperJson.allowErrorProps(...errorProps);
++  SuperJson.allowErrorProps(...errorProps)
+ }
+ class AuthenticationError extends Error {
+   constructor(message = "You must be logged in to access this") {
+-    super(message);
+-    this.name = "AuthenticationError";
+-    this.statusCode = 401;
++    super(message)
++    this.name = "AuthenticationError"
++    this.statusCode = 401
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class CSRFTokenMismatchError extends Error {
+   constructor() {
+-    super(...arguments);
+-    this.name = "CSRFTokenMismatchError";
+-    this.statusCode = 401;
++    super(...arguments)
++    this.name = "CSRFTokenMismatchError"
++    this.statusCode = 401
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class OAuthError extends Error {
+   constructor(message, redirect) {
+-    super(message);
+-    this.name = "OAuthError";
+-    this.statusCode = 500;
+-    this.redirect = redirect;
++    super(message)
++    this.name = "OAuthError"
++    this.statusCode = 500
++    this.redirect = redirect
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class AuthorizationError extends Error {
+   constructor(message = "You are not authorized to access this") {
+-    super(message);
+-    this.name = "AuthorizationError";
+-    this.statusCode = 403;
++    super(message)
++    this.name = "AuthorizationError"
++    this.statusCode = 403
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class NotFoundError extends Error {
+   constructor(message = "This could not be found") {
+-    super(message);
+-    this.name = "NotFoundError";
+-    this.statusCode = 404;
++    super(message)
++    this.name = "NotFoundError"
++    this.statusCode = 404
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class RedirectError extends Error {
+   constructor(url) {
+-    super(typeof url === "object" ? url.href : url);
+-    this.name = "RedirectError";
+-    this.statusCode = 302;
+-    this.url = url;
++    super(typeof url === "object" ? url.href : url)
++    this.name = "RedirectError"
++    this.statusCode = 302
++    this.url = url
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class PaginationArgumentError extends Error {
+   constructor(message = "The pagination arguments are invalid") {
+-    super(message);
+-    this.name = "PaginationArgumentError";
+-    this.statusCode = 422;
++    super(message)
++    this.name = "PaginationArgumentError"
++    this.statusCode = 422
+   }
+ }
+-let _blitzErrorClassRegistered = false;
++let _blitzErrorClassRegistered = false
+ function registerBlitzErrorClasses() {
+-  if (_blitzErrorClassRegistered || !index.isNotInUserTestEnvironment())
+-    return;
++  if (_blitzErrorClassRegistered || !index.isNotInUserTestEnvironment()) return
+   SuperJson.registerClass(AuthenticationError, {
+     identifier: "BlitzAuthenticationError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(CSRFTokenMismatchError, {
+     identifier: "BlitzCSRFTokenMismatchError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(AuthorizationError, {
+     identifier: "BlitzAuthorizationError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(NotFoundError, {
+     identifier: "BlitzNotFoundError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(RedirectError, {
+     identifier: "BlitzRedirectError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(PaginationArgumentError, {
+     identifier: "BlitzPaginationArgumentError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(OAuthError, {
+     identifier: "OAuthError",
+-    allowProps: errorProps
+-  });
+-  _blitzErrorClassRegistered = true;
++    allowProps: errorProps,
++  })
++  _blitzErrorClassRegistered = true
+ }
+-registerBlitzErrorClasses();
++registerBlitzErrorClasses()
+ 
+ var __async$2 = (__this, __arguments, generator) => {
+   return new Promise((resolve, reject) => {
+     var fulfilled = (value) => {
+       try {
+-        step(generator.next(value));
++        step(generator.next(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
++    }
+     var rejected = (value) => {
+       try {
+-        step(generator.throw(value));
++        step(generator.throw(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
+-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+-    step((generator = generator.apply(__this, __arguments)).next());
+-  });
+-};
++    }
++    var step = (x) =>
++      x.done
++        ? resolve(x.value)
++        : Promise.resolve(x.value).then(fulfilled, rejected)
++    step((generator = generator.apply(__this, __arguments)).next())
++  })
++}
+ const enhancePrisma = (client) => {
+   return new Proxy(client, {
+     construct(target, args) {
+       if (typeof window !== "undefined" && index.isNotInUserTestEnvironment()) {
+-        return { $use: () => {
+-        } };
++        return { $use: () => {} }
+       }
+       if (!globalThis._blitz_prismaClient) {
+-        const client2 = new target(...args);
++        const client2 = new target(...args)
+         client2.$reset = function reset() {
+           return __async$2(this, null, function* () {
+             if (process.env.NODE_ENV === "production") {
+               throw new Error(
+-                "You are calling db.$reset() in a production environment. We think you probably didn't mean to do that, so we are throwing this error instead of destroying your life's work."
+-              );
++                "You are calling db.$reset() in a production environment. We think you probably didn't mean to do that, so we are throwing this error instead of destroying your life's work.",
++              )
+             }
+-            const prismaBin = which__default(process.cwd()).sync("prisma");
++            const prismaBin = which__default(process.cwd()).sync("prisma")
+             yield new Promise((res, rej) => {
+-              const process2 = spawn.spawn(prismaBin, ["migrate", "reset", "--force", "--skip-generate"], {
+-                stdio: "ignore"
+-              });
+-              process2.on(
+-                "exit",
+-                (code) => code === 0 ? res(0) : rej(new Error(`db.$reset() failed with code ${code}`))
+-              );
+-            });
+-            globalThis._blitz_prismaClient.$disconnect();
+-          });
+-        };
+-        globalThis._blitz_prismaClient = client2;
++              const process2 = spawn.spawn(
++                prismaBin,
++                ["migrate", "reset", "--force"],
++                {
++                  stdio: "ignore",
++                },
++              )
++              process2.on("exit", (code) =>
++                code === 0
++                  ? res(0)
++                  : rej(new Error(`db.$reset() failed with code ${code}`)),
++              )
++            })
++            globalThis._blitz_prismaClient.$disconnect()
++          })
++        }
++        globalThis._blitz_prismaClient = client2
+       }
+-      return globalThis._blitz_prismaClient;
+-    }
+-  });
+-};
++      return globalThis._blitz_prismaClient
++    },
++  })
++}
+ 
+ const isRouteUrlObject = (x) => {
+-  return typeof x === "object" && "pathname" in x && typeof x.pathname === "string" && "href" in x && typeof x.href === "string";
+-};
++  return (
++    typeof x === "object" &&
++    "pathname" in x &&
++    typeof x.pathname === "string" &&
++    "href" in x &&
++    typeof x.href === "string"
++  )
++}
+ 
+ var __async$1 = (__this, __arguments, generator) => {
+   return new Promise((resolve, reject) => {
+     var fulfilled = (value) => {
+       try {
+-        step(generator.next(value));
++        step(generator.next(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
++    }
+     var rejected = (value) => {
+       try {
+-        step(generator.throw(value));
++        step(generator.throw(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
+-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+-    step((generator = generator.apply(__this, __arguments)).next());
+-  });
+-};
++    }
++    var step = (x) =>
++      x.done
++        ? resolve(x.value)
++        : Promise.resolve(x.value).then(fulfilled, rejected)
++    step((generator = generator.apply(__this, __arguments)).next())
++  })
++}
+ function recursiveFormatZodErrors(errors) {
+-  var _a, _b;
+-  let formattedErrors = {};
++  var _a, _b
++  let formattedErrors = {}
+   for (const key in errors) {
+     if (key === "_errors") {
+-      continue;
++      continue
+     }
+-    if ((_b = (_a = errors[key]) == null ? void 0 : _a._errors) == null ? void 0 : _b[0]) {
++    if (
++      (_b = (_a = errors[key]) == null ? void 0 : _a._errors) == null
++        ? void 0
++        : _b[0]
++    ) {
+       if (!isNaN(key) && !Array.isArray(formattedErrors)) {
+-        formattedErrors = [];
++        formattedErrors = []
+       }
+-      formattedErrors[key] = errors[key]._errors[0];
++      formattedErrors[key] = errors[key]._errors[0]
+     } else {
+       if (!isNaN(key) && !Array.isArray(formattedErrors)) {
+-        formattedErrors = [];
++        formattedErrors = []
+       }
+-      formattedErrors[key] = recursiveFormatZodErrors(errors[key]);
++      formattedErrors[key] = recursiveFormatZodErrors(errors[key])
+     }
+   }
+-  return formattedErrors;
++  return formattedErrors
+ }
+ function formatZodError(error) {
+   if (!error || typeof error.format !== "function") {
+-    throw new Error("The argument to formatZodError must be a zod error with error.format()");
++    throw new Error(
++      "The argument to formatZodError must be a zod error with error.format()",
++    )
+   }
+-  const errors = error.format();
+-  return recursiveFormatZodErrors(errors);
++  const errors = error.format()
++  return recursiveFormatZodErrors(errors)
+ }
+ const validateZodSchemaSync = (schema) => (values) => {
+-  if (!schema)
+-    return {};
+-  try {
+-    schema.parse(values);
+-    return {};
+-  } catch (error) {
+-    return error.format ? formatZodError(error) : error.toString();
+-  }
+-};
+-const validateZodSchemaAsync = (schema) => (values) => __async$1(void 0, null, function* () {
+-  if (!schema)
+-    return {};
++  if (!schema) return {}
+   try {
+-    yield schema.parseAsync(values);
+-    return {};
++    schema.parse(values)
++    return {}
+   } catch (error) {
+-    return error.format ? formatZodError(error) : error.toString();
++    return error.format ? formatZodError(error) : error.toString()
+   }
+-});
++}
++const validateZodSchemaAsync = (schema) => (values) =>
++  __async$1(void 0, null, function* () {
++    if (!schema) return {}
++    try {
++      yield schema.parseAsync(values)
++      return {}
++    } catch (error) {
++      return error.format ? formatZodError(error) : error.toString()
++    }
++  })
+ function validateZodSchema(schema, parserType = "async") {
+   if (parserType === "sync") {
+-    return validateZodSchemaSync(schema);
++    return validateZodSchemaSync(schema)
+   } else {
+-    return validateZodSchemaAsync(schema);
++    return validateZodSchemaAsync(schema)
+   }
+ }
+ 
+-var __defProp = Object.defineProperty;
+-var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+-var __hasOwnProp = Object.prototype.hasOwnProperty;
+-var __propIsEnum = Object.prototype.propertyIsEnumerable;
+-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
++var __defProp = Object.defineProperty
++var __getOwnPropSymbols = Object.getOwnPropertySymbols
++var __hasOwnProp = Object.prototype.hasOwnProperty
++var __propIsEnum = Object.prototype.propertyIsEnumerable
++var __defNormalProp = (obj, key, value) =>
++  key in obj
++    ? __defProp(obj, key, {
++        enumerable: true,
++        configurable: true,
++        writable: true,
++        value,
++      })
++    : (obj[key] = value)
+ var __spreadValues = (a, b) => {
+   for (var prop in b || (b = {}))
+-    if (__hasOwnProp.call(b, prop))
+-      __defNormalProp(a, prop, b[prop]);
++    if (__hasOwnProp.call(b, prop)) __defNormalProp(a, prop, b[prop])
+   if (__getOwnPropSymbols)
+     for (var prop of __getOwnPropSymbols(b)) {
+-      if (__propIsEnum.call(b, prop))
+-        __defNormalProp(a, prop, b[prop]);
++      if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop])
+     }
+-  return a;
+-};
++  return a
++}
+ var __async = (__this, __arguments, generator) => {
+   return new Promise((resolve, reject) => {
+     var fulfilled = (value) => {
+       try {
+-        step(generator.next(value));
++        step(generator.next(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
++    }
+     var rejected = (value) => {
+       try {
+-        step(generator.throw(value));
++        step(generator.throw(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
+-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+-    step((generator = generator.apply(__this, __arguments)).next());
+-  });
+-};
++    }
++    var step = (x) =>
++      x.done
++        ? resolve(x.value)
++        : Promise.resolve(x.value).then(fulfilled, rejected)
++    step((generator = generator.apply(__this, __arguments)).next())
++  })
++}
+ function merge([...fns]) {
+-  return (args) => fns.map((fn) => fn(args));
++  return (args) => fns.map((fn) => fn(args))
+ }
+ function pipe(...fns) {
+-  return (x) => fns.reduce((v, f) => f(v), x);
++  return (x) => fns.reduce((v, f) => f(v), x)
+ }
+-const compose = (...rest) => (x) => rest.reduceRight((y, f) => f(y), x);
+-function reduceBlitzClientPlugins({
+-  plugins
+-}) {
++const compose =
++  (...rest) =>
++  (x) =>
++    rest.reduceRight((y, f) => f(y), x)
++function reduceBlitzClientPlugins({ plugins }) {
+   const { middleware, events, exports, providers } = plugins.reduce(
+     (acc, plugin) => ({
+       middleware: {
+-        beforeHttpRequest: plugin.middleware.beforeHttpRequest ? pipe(acc.middleware.beforeHttpRequest, plugin.middleware.beforeHttpRequest) : acc.middleware.beforeHttpRequest,
+-        beforeHttpResponse: plugin.middleware.beforeHttpResponse ? pipe(acc.middleware.beforeHttpResponse, plugin.middleware.beforeHttpResponse) : acc.middleware.beforeHttpResponse
++        beforeHttpRequest: plugin.middleware.beforeHttpRequest
++          ? pipe(
++              acc.middleware.beforeHttpRequest,
++              plugin.middleware.beforeHttpRequest,
++            )
++          : acc.middleware.beforeHttpRequest,
++        beforeHttpResponse: plugin.middleware.beforeHttpResponse
++          ? pipe(
++              acc.middleware.beforeHttpResponse,
++              plugin.middleware.beforeHttpResponse,
++            )
++          : acc.middleware.beforeHttpResponse,
+       },
+       events: {
+-        onRpcError: plugin.events.onRpcError ? merge([
+-          ...Array.isArray(acc.events.onRpcError) ? acc.events.onRpcError : [acc.events.onRpcError],
+-          plugin.events.onRpcError
+-        ]) : acc.events.onRpcError,
+-        onSessionCreated: plugin.events.onSessionCreated ? merge([
+-          ...Array.isArray(acc.events.onSessionCreated) ? acc.events.onSessionCreated : [acc.events.onSessionCreated],
+-          plugin.events.onSessionCreated
+-        ]) : acc.events.onSessionCreated
++        onRpcError: plugin.events.onRpcError
++          ? merge([
++              ...(Array.isArray(acc.events.onRpcError)
++                ? acc.events.onRpcError
++                : [acc.events.onRpcError]),
++              plugin.events.onRpcError,
++            ])
++          : acc.events.onRpcError,
++        onSessionCreated: plugin.events.onSessionCreated
++          ? merge([
++              ...(Array.isArray(acc.events.onSessionCreated)
++                ? acc.events.onSessionCreated
++                : [acc.events.onSessionCreated]),
++              plugin.events.onSessionCreated,
++            ])
++          : acc.events.onSessionCreated,
+       },
+-      exports: __spreadValues(__spreadValues({}, plugin.exports()), acc.exports),
+-      providers: plugin.withProvider ? acc.providers.concat(plugin.withProvider) : acc.providers
++      exports: __spreadValues(
++        __spreadValues({}, plugin.exports()),
++        acc.exports,
++      ),
++      providers: plugin.withProvider
++        ? acc.providers.concat(plugin.withProvider)
++        : acc.providers,
+     }),
+     {
+       middleware: {
+         beforeHttpRequest: pipe(),
+-        beforeHttpResponse: pipe()
++        beforeHttpResponse: pipe(),
+       },
+       events: {
+         onRpcError: merge([]),
+-        onSessionCreated: merge([])
++        onSessionCreated: merge([]),
+       },
+       exports: {},
+-      providers: []
+-    }
+-  );
+-  globalThis.__BLITZ_MIDDLEWARE_HOOKS = middleware;
++      providers: [],
++    },
++  )
++  globalThis.__BLITZ_MIDDLEWARE_HOOKS = middleware
+   if (index.isClient) {
+     if (globalThis.__BLITZ_CLEAN_UP_LISTENERS) {
+-      globalThis.__BLITZ_CLEAN_UP_LISTENERS();
++      globalThis.__BLITZ_CLEAN_UP_LISTENERS()
+     }
+-    const onSessionCreated = () => __async(this, null, function* () {
+-      yield Promise.all(events.onSessionCreated());
+-    });
+-    const onRpcError = (e) => __async(this, null, function* () {
+-      const customEvent = e;
+-      yield Promise.all(events.onRpcError(customEvent.detail));
+-    });
+-    document.addEventListener("blitz:session-created", onSessionCreated);
+-    document.addEventListener("blitz:rpc-error", onRpcError);
++    const onSessionCreated = () =>
++      __async(this, null, function* () {
++        yield Promise.all(events.onSessionCreated())
++      })
++    const onRpcError = (e) =>
++      __async(this, null, function* () {
++        const customEvent = e
++        yield Promise.all(events.onRpcError(customEvent.detail))
++      })
++    document.addEventListener("blitz:session-created", onSessionCreated)
++    document.addEventListener("blitz:rpc-error", onRpcError)
+     globalThis.__BLITZ_CLEAN_UP_LISTENERS = () => {
+-      document.removeEventListener("blitz:session-created", onSessionCreated);
+-      document.removeEventListener("blitz:rpc-error", onRpcError);
+-    };
++      document.removeEventListener("blitz:session-created", onSessionCreated)
++      document.removeEventListener("blitz:rpc-error", onRpcError)
++    }
+   }
+-  const withPlugins = compose(...providers);
++  const withPlugins = compose(...providers)
+   return {
+     exports,
+     middleware,
+     events,
+-    withPlugins
+-  };
++    withPlugins,
++  }
+ }
+-function reduceBlitzServerPlugins({
+-  plugins
+-}) {
+-  const middlewares = plugins.flatMap((p) => p.requestMiddlewares);
+-  const contextMiddleware = plugins.flatMap((p) => p.contextMiddleware).filter(Boolean);
++function reduceBlitzServerPlugins({ plugins }) {
++  const middlewares = plugins.flatMap((p) => p.requestMiddlewares)
++  const contextMiddleware = plugins
++    .flatMap((p) => p.contextMiddleware)
++    .filter(Boolean)
+   const { pluginExports } = plugins.reduce(
+     (acc, plugin) => ({
+-      pluginExports: __spreadValues(__spreadValues({}, plugin.exports()), acc.pluginExports)
++      pluginExports: __spreadValues(
++        __spreadValues({}, plugin.exports()),
++        acc.pluginExports,
++      ),
+     }),
+     {
+-      pluginExports: {}
+-    }
+-  );
+-  return { pluginExports, middlewares, contextMiddleware };
++      pluginExports: {},
++    },
++  )
++  return { pluginExports, middlewares, contextMiddleware }
+ }
+ 
+ function createClientPlugin(pluginConstructor) {
+-  return pluginConstructor;
++  return pluginConstructor
+ }
+ if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+-  let onUnhandledError = function(ev) {
+-    if (ev.error instanceof RedirectError || ev.error instanceof AuthenticationError || ev.error instanceof AuthorizationError || ev.error instanceof NotFoundError) {
+-      ev.preventDefault();
++  let onUnhandledError = function (ev) {
++    if (
++      ev.error instanceof RedirectError ||
++      ev.error instanceof AuthenticationError ||
++      ev.error instanceof AuthorizationError ||
++      ev.error instanceof NotFoundError
++    ) {
++      ev.preventDefault()
+     }
+-  };
++  }
+   if (typeof window !== "undefined") {
+-    window.addEventListener("error", onUnhandledError);
++    window.addEventListener("error", onUnhandledError)
+     if ("Cypress" in window) {
+-      const cypressOnErrorFun = window.onerror;
++      const cypressOnErrorFun = window.onerror
+       window.onerror = (message, source, lineno, colno, err) => {
+-        if (cypressOnErrorFun && !(err instanceof RedirectError || err instanceof AuthenticationError || err instanceof AuthorizationError || err instanceof NotFoundError)) {
+-          cypressOnErrorFun(message, source, lineno, colno, err);
++        if (
++          cypressOnErrorFun &&
++          !(
++            err instanceof RedirectError ||
++            err instanceof AuthenticationError ||
++            err instanceof AuthorizationError ||
++            err instanceof NotFoundError
++          )
++        ) {
++          cypressOnErrorFun(message, source, lineno, colno, err)
+         }
+-      };
++      }
+     }
+   }
+ }
+ 
+-exports.AuthenticationError = AuthenticationError;
+-exports.AuthorizationError = AuthorizationError;
+-exports.CSRFTokenMismatchError = CSRFTokenMismatchError;
+-exports.NotFoundError = NotFoundError;
+-exports.OAuthError = OAuthError;
+-exports.PaginationArgumentError = PaginationArgumentError;
+-exports.RedirectError = RedirectError;
+-exports.createClientPlugin = createClientPlugin;
+-exports.enhancePrisma = enhancePrisma;
+-exports.formatZodError = formatZodError;
+-exports.isRouteUrlObject = isRouteUrlObject;
+-exports.merge = merge;
+-exports.pipe = pipe;
+-exports.recursiveFormatZodErrors = recursiveFormatZodErrors;
+-exports.reduceBlitzClientPlugins = reduceBlitzClientPlugins;
+-exports.reduceBlitzServerPlugins = reduceBlitzServerPlugins;
+-exports.registerBlitzErrorClasses = registerBlitzErrorClasses;
+-exports.validateZodSchema = validateZodSchema;
++exports.AuthenticationError = AuthenticationError
++exports.AuthorizationError = AuthorizationError
++exports.CSRFTokenMismatchError = CSRFTokenMismatchError
++exports.NotFoundError = NotFoundError
++exports.OAuthError = OAuthError
++exports.PaginationArgumentError = PaginationArgumentError
++exports.RedirectError = RedirectError
++exports.createClientPlugin = createClientPlugin
++exports.enhancePrisma = enhancePrisma
++exports.formatZodError = formatZodError
++exports.isRouteUrlObject = isRouteUrlObject
++exports.merge = merge
++exports.pipe = pipe
++exports.recursiveFormatZodErrors = recursiveFormatZodErrors
++exports.reduceBlitzClientPlugins = reduceBlitzClientPlugins
++exports.reduceBlitzServerPlugins = reduceBlitzServerPlugins
++exports.registerBlitzErrorClasses = registerBlitzErrorClasses
++exports.validateZodSchema = validateZodSchema
+diff --git a/dist/chunks/index-browser.mjs b/dist/chunks/index-browser.mjs
+index b715d04a8306fbcb349c064b0abd8e820ce6d5bf..d8b3f0b05a03ab3417e4c1b6ee3dd406cee779b4 100644
+--- a/dist/chunks/index-browser.mjs
++++ b/dist/chunks/index-browser.mjs
+@@ -1,395 +1,485 @@
+-import _SuperJson from 'superjson';
+-import { i as isNotInUserTestEnvironment, a as isClient } from './index.mjs';
+-import { spawn } from 'cross-spawn';
+-import which from 'npm-which';
++import _SuperJson from "superjson"
++import { i as isNotInUserTestEnvironment, a as isClient } from "./index.mjs"
++import { spawn } from "cross-spawn"
++import which from "npm-which"
+ 
+-const SuperJson = "default" in _SuperJson ? _SuperJson.default : _SuperJson;
+-const errorProps = ["name", "message", "code", "statusCode", "meta", "url"];
++const SuperJson = "default" in _SuperJson ? _SuperJson.default : _SuperJson
++const errorProps = ["name", "message", "code", "statusCode", "meta", "url"]
+ if (isNotInUserTestEnvironment()) {
+-  SuperJson.allowErrorProps(...errorProps);
++  SuperJson.allowErrorProps(...errorProps)
+ }
+ class AuthenticationError extends Error {
+   constructor(message = "You must be logged in to access this") {
+-    super(message);
+-    this.name = "AuthenticationError";
+-    this.statusCode = 401;
++    super(message)
++    this.name = "AuthenticationError"
++    this.statusCode = 401
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class CSRFTokenMismatchError extends Error {
+   constructor() {
+-    super(...arguments);
+-    this.name = "CSRFTokenMismatchError";
+-    this.statusCode = 401;
++    super(...arguments)
++    this.name = "CSRFTokenMismatchError"
++    this.statusCode = 401
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class OAuthError extends Error {
+   constructor(message, redirect) {
+-    super(message);
+-    this.name = "OAuthError";
+-    this.statusCode = 500;
+-    this.redirect = redirect;
++    super(message)
++    this.name = "OAuthError"
++    this.statusCode = 500
++    this.redirect = redirect
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class AuthorizationError extends Error {
+   constructor(message = "You are not authorized to access this") {
+-    super(message);
+-    this.name = "AuthorizationError";
+-    this.statusCode = 403;
++    super(message)
++    this.name = "AuthorizationError"
++    this.statusCode = 403
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class NotFoundError extends Error {
+   constructor(message = "This could not be found") {
+-    super(message);
+-    this.name = "NotFoundError";
+-    this.statusCode = 404;
++    super(message)
++    this.name = "NotFoundError"
++    this.statusCode = 404
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class RedirectError extends Error {
+   constructor(url) {
+-    super(typeof url === "object" ? url.href : url);
+-    this.name = "RedirectError";
+-    this.statusCode = 302;
+-    this.url = url;
++    super(typeof url === "object" ? url.href : url)
++    this.name = "RedirectError"
++    this.statusCode = 302
++    this.url = url
+   }
+   get _clearStack() {
+-    return true;
++    return true
+   }
+ }
+ class PaginationArgumentError extends Error {
+   constructor(message = "The pagination arguments are invalid") {
+-    super(message);
+-    this.name = "PaginationArgumentError";
+-    this.statusCode = 422;
++    super(message)
++    this.name = "PaginationArgumentError"
++    this.statusCode = 422
+   }
+ }
+-let _blitzErrorClassRegistered = false;
++let _blitzErrorClassRegistered = false
+ function registerBlitzErrorClasses() {
+-  if (_blitzErrorClassRegistered || !isNotInUserTestEnvironment())
+-    return;
++  if (_blitzErrorClassRegistered || !isNotInUserTestEnvironment()) return
+   SuperJson.registerClass(AuthenticationError, {
+     identifier: "BlitzAuthenticationError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(CSRFTokenMismatchError, {
+     identifier: "BlitzCSRFTokenMismatchError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(AuthorizationError, {
+     identifier: "BlitzAuthorizationError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(NotFoundError, {
+     identifier: "BlitzNotFoundError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(RedirectError, {
+     identifier: "BlitzRedirectError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(PaginationArgumentError, {
+     identifier: "BlitzPaginationArgumentError",
+-    allowProps: errorProps
+-  });
++    allowProps: errorProps,
++  })
+   SuperJson.registerClass(OAuthError, {
+     identifier: "OAuthError",
+-    allowProps: errorProps
+-  });
+-  _blitzErrorClassRegistered = true;
++    allowProps: errorProps,
++  })
++  _blitzErrorClassRegistered = true
+ }
+-registerBlitzErrorClasses();
++registerBlitzErrorClasses()
+ 
+ var __async$2 = (__this, __arguments, generator) => {
+   return new Promise((resolve, reject) => {
+     var fulfilled = (value) => {
+       try {
+-        step(generator.next(value));
++        step(generator.next(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
++    }
+     var rejected = (value) => {
+       try {
+-        step(generator.throw(value));
++        step(generator.throw(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
+-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+-    step((generator = generator.apply(__this, __arguments)).next());
+-  });
+-};
++    }
++    var step = (x) =>
++      x.done
++        ? resolve(x.value)
++        : Promise.resolve(x.value).then(fulfilled, rejected)
++    step((generator = generator.apply(__this, __arguments)).next())
++  })
++}
+ const enhancePrisma = (client) => {
+   return new Proxy(client, {
+     construct(target, args) {
+       if (typeof window !== "undefined" && isNotInUserTestEnvironment()) {
+-        return { $use: () => {
+-        } };
++        return { $use: () => {} }
+       }
+       if (!globalThis._blitz_prismaClient) {
+-        const client2 = new target(...args);
++        const client2 = new target(...args)
+         client2.$reset = function reset() {
+           return __async$2(this, null, function* () {
+             if (process.env.NODE_ENV === "production") {
+               throw new Error(
+-                "You are calling db.$reset() in a production environment. We think you probably didn't mean to do that, so we are throwing this error instead of destroying your life's work."
+-              );
++                "You are calling db.$reset() in a production environment. We think you probably didn't mean to do that, so we are throwing this error instead of destroying your life's work.",
++              )
+             }
+-            const prismaBin = which(process.cwd()).sync("prisma");
++            const prismaBin = which(process.cwd()).sync("prisma")
+             yield new Promise((res, rej) => {
+-              const process2 = spawn(prismaBin, ["migrate", "reset", "--force", "--skip-generate"], {
+-                stdio: "ignore"
+-              });
+-              process2.on(
+-                "exit",
+-                (code) => code === 0 ? res(0) : rej(new Error(`db.$reset() failed with code ${code}`))
+-              );
+-            });
+-            globalThis._blitz_prismaClient.$disconnect();
+-          });
+-        };
+-        globalThis._blitz_prismaClient = client2;
++              const process2 = spawn(
++                prismaBin,
++                ["migrate", "reset", "--force"],
++                {
++                  stdio: "ignore",
++                },
++              )
++              process2.on("exit", (code) =>
++                code === 0
++                  ? res(0)
++                  : rej(new Error(`db.$reset() failed with code ${code}`)),
++              )
++            })
++            globalThis._blitz_prismaClient.$disconnect()
++          })
++        }
++        globalThis._blitz_prismaClient = client2
+       }
+-      return globalThis._blitz_prismaClient;
+-    }
+-  });
+-};
++      return globalThis._blitz_prismaClient
++    },
++  })
++}
+ 
+ const isRouteUrlObject = (x) => {
+-  return typeof x === "object" && "pathname" in x && typeof x.pathname === "string" && "href" in x && typeof x.href === "string";
+-};
++  return (
++    typeof x === "object" &&
++    "pathname" in x &&
++    typeof x.pathname === "string" &&
++    "href" in x &&
++    typeof x.href === "string"
++  )
++}
+ 
+ var __async$1 = (__this, __arguments, generator) => {
+   return new Promise((resolve, reject) => {
+     var fulfilled = (value) => {
+       try {
+-        step(generator.next(value));
++        step(generator.next(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
++    }
+     var rejected = (value) => {
+       try {
+-        step(generator.throw(value));
++        step(generator.throw(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
+-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+-    step((generator = generator.apply(__this, __arguments)).next());
+-  });
+-};
++    }
++    var step = (x) =>
++      x.done
++        ? resolve(x.value)
++        : Promise.resolve(x.value).then(fulfilled, rejected)
++    step((generator = generator.apply(__this, __arguments)).next())
++  })
++}
+ function recursiveFormatZodErrors(errors) {
+-  var _a, _b;
+-  let formattedErrors = {};
++  var _a, _b
++  let formattedErrors = {}
+   for (const key in errors) {
+     if (key === "_errors") {
+-      continue;
++      continue
+     }
+-    if ((_b = (_a = errors[key]) == null ? void 0 : _a._errors) == null ? void 0 : _b[0]) {
++    if (
++      (_b = (_a = errors[key]) == null ? void 0 : _a._errors) == null
++        ? void 0
++        : _b[0]
++    ) {
+       if (!isNaN(key) && !Array.isArray(formattedErrors)) {
+-        formattedErrors = [];
++        formattedErrors = []
+       }
+-      formattedErrors[key] = errors[key]._errors[0];
++      formattedErrors[key] = errors[key]._errors[0]
+     } else {
+       if (!isNaN(key) && !Array.isArray(formattedErrors)) {
+-        formattedErrors = [];
++        formattedErrors = []
+       }
+-      formattedErrors[key] = recursiveFormatZodErrors(errors[key]);
++      formattedErrors[key] = recursiveFormatZodErrors(errors[key])
+     }
+   }
+-  return formattedErrors;
++  return formattedErrors
+ }
+ function formatZodError(error) {
+   if (!error || typeof error.format !== "function") {
+-    throw new Error("The argument to formatZodError must be a zod error with error.format()");
++    throw new Error(
++      "The argument to formatZodError must be a zod error with error.format()",
++    )
+   }
+-  const errors = error.format();
+-  return recursiveFormatZodErrors(errors);
++  const errors = error.format()
++  return recursiveFormatZodErrors(errors)
+ }
+ const validateZodSchemaSync = (schema) => (values) => {
+-  if (!schema)
+-    return {};
+-  try {
+-    schema.parse(values);
+-    return {};
+-  } catch (error) {
+-    return error.format ? formatZodError(error) : error.toString();
+-  }
+-};
+-const validateZodSchemaAsync = (schema) => (values) => __async$1(void 0, null, function* () {
+-  if (!schema)
+-    return {};
++  if (!schema) return {}
+   try {
+-    yield schema.parseAsync(values);
+-    return {};
++    schema.parse(values)
++    return {}
+   } catch (error) {
+-    return error.format ? formatZodError(error) : error.toString();
++    return error.format ? formatZodError(error) : error.toString()
+   }
+-});
++}
++const validateZodSchemaAsync = (schema) => (values) =>
++  __async$1(void 0, null, function* () {
++    if (!schema) return {}
++    try {
++      yield schema.parseAsync(values)
++      return {}
++    } catch (error) {
++      return error.format ? formatZodError(error) : error.toString()
++    }
++  })
+ function validateZodSchema(schema, parserType = "async") {
+   if (parserType === "sync") {
+-    return validateZodSchemaSync(schema);
++    return validateZodSchemaSync(schema)
+   } else {
+-    return validateZodSchemaAsync(schema);
++    return validateZodSchemaAsync(schema)
+   }
+ }
+ 
+-var __defProp = Object.defineProperty;
+-var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+-var __hasOwnProp = Object.prototype.hasOwnProperty;
+-var __propIsEnum = Object.prototype.propertyIsEnumerable;
+-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
++var __defProp = Object.defineProperty
++var __getOwnPropSymbols = Object.getOwnPropertySymbols
++var __hasOwnProp = Object.prototype.hasOwnProperty
++var __propIsEnum = Object.prototype.propertyIsEnumerable
++var __defNormalProp = (obj, key, value) =>
++  key in obj
++    ? __defProp(obj, key, {
++        enumerable: true,
++        configurable: true,
++        writable: true,
++        value,
++      })
++    : (obj[key] = value)
+ var __spreadValues = (a, b) => {
+   for (var prop in b || (b = {}))
+-    if (__hasOwnProp.call(b, prop))
+-      __defNormalProp(a, prop, b[prop]);
++    if (__hasOwnProp.call(b, prop)) __defNormalProp(a, prop, b[prop])
+   if (__getOwnPropSymbols)
+     for (var prop of __getOwnPropSymbols(b)) {
+-      if (__propIsEnum.call(b, prop))
+-        __defNormalProp(a, prop, b[prop]);
++      if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop])
+     }
+-  return a;
+-};
++  return a
++}
+ var __async = (__this, __arguments, generator) => {
+   return new Promise((resolve, reject) => {
+     var fulfilled = (value) => {
+       try {
+-        step(generator.next(value));
++        step(generator.next(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
++    }
+     var rejected = (value) => {
+       try {
+-        step(generator.throw(value));
++        step(generator.throw(value))
+       } catch (e) {
+-        reject(e);
++        reject(e)
+       }
+-    };
+-    var step = (x) => x.done ? resolve(x.value) : Promise.resolve(x.value).then(fulfilled, rejected);
+-    step((generator = generator.apply(__this, __arguments)).next());
+-  });
+-};
++    }
++    var step = (x) =>
++      x.done
++        ? resolve(x.value)
++        : Promise.resolve(x.value).then(fulfilled, rejected)
++    step((generator = generator.apply(__this, __arguments)).next())
++  })
++}
+ function merge([...fns]) {
+-  return (args) => fns.map((fn) => fn(args));
++  return (args) => fns.map((fn) => fn(args))
+ }
+ function pipe(...fns) {
+-  return (x) => fns.reduce((v, f) => f(v), x);
++  return (x) => fns.reduce((v, f) => f(v), x)
+ }
+-const compose = (...rest) => (x) => rest.reduceRight((y, f) => f(y), x);
+-function reduceBlitzClientPlugins({
+-  plugins
+-}) {
++const compose =
++  (...rest) =>
++  (x) =>
++    rest.reduceRight((y, f) => f(y), x)
++function reduceBlitzClientPlugins({ plugins }) {
+   const { middleware, events, exports, providers } = plugins.reduce(
+     (acc, plugin) => ({
+       middleware: {
+-        beforeHttpRequest: plugin.middleware.beforeHttpRequest ? pipe(acc.middleware.beforeHttpRequest, plugin.middleware.beforeHttpRequest) : acc.middleware.beforeHttpRequest,
+-        beforeHttpResponse: plugin.middleware.beforeHttpResponse ? pipe(acc.middleware.beforeHttpResponse, plugin.middleware.beforeHttpResponse) : acc.middleware.beforeHttpResponse
++        beforeHttpRequest: plugin.middleware.beforeHttpRequest
++          ? pipe(
++              acc.middleware.beforeHttpRequest,
++              plugin.middleware.beforeHttpRequest,
++            )
++          : acc.middleware.beforeHttpRequest,
++        beforeHttpResponse: plugin.middleware.beforeHttpResponse
++          ? pipe(
++              acc.middleware.beforeHttpResponse,
++              plugin.middleware.beforeHttpResponse,
++            )
++          : acc.middleware.beforeHttpResponse,
+       },
+       events: {
+-        onRpcError: plugin.events.onRpcError ? merge([
+-          ...Array.isArray(acc.events.onRpcError) ? acc.events.onRpcError : [acc.events.onRpcError],
+-          plugin.events.onRpcError
+-        ]) : acc.events.onRpcError,
+-        onSessionCreated: plugin.events.onSessionCreated ? merge([
+-          ...Array.isArray(acc.events.onSessionCreated) ? acc.events.onSessionCreated : [acc.events.onSessionCreated],
+-          plugin.events.onSessionCreated
+-        ]) : acc.events.onSessionCreated
++        onRpcError: plugin.events.onRpcError
++          ? merge([
++              ...(Array.isArray(acc.events.onRpcError)
++                ? acc.events.onRpcError
++                : [acc.events.onRpcError]),
++              plugin.events.onRpcError,
++            ])
++          : acc.events.onRpcError,
++        onSessionCreated: plugin.events.onSessionCreated
++          ? merge([
++              ...(Array.isArray(acc.events.onSessionCreated)
++                ? acc.events.onSessionCreated
++                : [acc.events.onSessionCreated]),
++              plugin.events.onSessionCreated,
++            ])
++          : acc.events.onSessionCreated,
+       },
+-      exports: __spreadValues(__spreadValues({}, plugin.exports()), acc.exports),
+-      providers: plugin.withProvider ? acc.providers.concat(plugin.withProvider) : acc.providers
++      exports: __spreadValues(
++        __spreadValues({}, plugin.exports()),
++        acc.exports,
++      ),
++      providers: plugin.withProvider
++        ? acc.providers.concat(plugin.withProvider)
++        : acc.providers,
+     }),
+     {
+       middleware: {
+         beforeHttpRequest: pipe(),
+-        beforeHttpResponse: pipe()
++        beforeHttpResponse: pipe(),
+       },
+       events: {
+         onRpcError: merge([]),
+-        onSessionCreated: merge([])
++        onSessionCreated: merge([]),
+       },
+       exports: {},
+-      providers: []
+-    }
+-  );
+-  globalThis.__BLITZ_MIDDLEWARE_HOOKS = middleware;
++      providers: [],
++    },
++  )
++  globalThis.__BLITZ_MIDDLEWARE_HOOKS = middleware
+   if (isClient) {
+     if (globalThis.__BLITZ_CLEAN_UP_LISTENERS) {
+-      globalThis.__BLITZ_CLEAN_UP_LISTENERS();
++      globalThis.__BLITZ_CLEAN_UP_LISTENERS()
+     }
+-    const onSessionCreated = () => __async(this, null, function* () {
+-      yield Promise.all(events.onSessionCreated());
+-    });
+-    const onRpcError = (e) => __async(this, null, function* () {
+-      const customEvent = e;
+-      yield Promise.all(events.onRpcError(customEvent.detail));
+-    });
+-    document.addEventListener("blitz:session-created", onSessionCreated);
+-    document.addEventListener("blitz:rpc-error", onRpcError);
++    const onSessionCreated = () =>
++      __async(this, null, function* () {
++        yield Promise.all(events.onSessionCreated())
++      })
++    const onRpcError = (e) =>
++      __async(this, null, function* () {
++        const customEvent = e
++        yield Promise.all(events.onRpcError(customEvent.detail))
++      })
++    document.addEventListener("blitz:session-created", onSessionCreated)
++    document.addEventListener("blitz:rpc-error", onRpcError)
+     globalThis.__BLITZ_CLEAN_UP_LISTENERS = () => {
+-      document.removeEventListener("blitz:session-created", onSessionCreated);
+-      document.removeEventListener("blitz:rpc-error", onRpcError);
+-    };
++      document.removeEventListener("blitz:session-created", onSessionCreated)
++      document.removeEventListener("blitz:rpc-error", onRpcError)
++    }
+   }
+-  const withPlugins = compose(...providers);
++  const withPlugins = compose(...providers)
+   return {
+     exports,
+     middleware,
+     events,
+-    withPlugins
+-  };
++    withPlugins,
++  }
+ }
+-function reduceBlitzServerPlugins({
+-  plugins
+-}) {
+-  const middlewares = plugins.flatMap((p) => p.requestMiddlewares);
+-  const contextMiddleware = plugins.flatMap((p) => p.contextMiddleware).filter(Boolean);
++function reduceBlitzServerPlugins({ plugins }) {
++  const middlewares = plugins.flatMap((p) => p.requestMiddlewares)
++  const contextMiddleware = plugins
++    .flatMap((p) => p.contextMiddleware)
++    .filter(Boolean)
+   const { pluginExports } = plugins.reduce(
+     (acc, plugin) => ({
+-      pluginExports: __spreadValues(__spreadValues({}, plugin.exports()), acc.pluginExports)
++      pluginExports: __spreadValues(
++        __spreadValues({}, plugin.exports()),
++        acc.pluginExports,
++      ),
+     }),
+     {
+-      pluginExports: {}
+-    }
+-  );
+-  return { pluginExports, middlewares, contextMiddleware };
++      pluginExports: {},
++    },
++  )
++  return { pluginExports, middlewares, contextMiddleware }
+ }
+ 
+ function createClientPlugin(pluginConstructor) {
+-  return pluginConstructor;
++  return pluginConstructor
+ }
+ if (typeof window !== "undefined" && process.env.NODE_ENV === "development") {
+-  let onUnhandledError = function(ev) {
+-    if (ev.error instanceof RedirectError || ev.error instanceof AuthenticationError || ev.error instanceof AuthorizationError || ev.error instanceof NotFoundError) {
+-      ev.preventDefault();
++  let onUnhandledError = function (ev) {
++    if (
++      ev.error instanceof RedirectError ||
++      ev.error instanceof AuthenticationError ||
++      ev.error instanceof AuthorizationError ||
++      ev.error instanceof NotFoundError
++    ) {
++      ev.preventDefault()
+     }
+-  };
++  }
+   if (typeof window !== "undefined") {
+-    window.addEventListener("error", onUnhandledError);
++    window.addEventListener("error", onUnhandledError)
+     if ("Cypress" in window) {
+-      const cypressOnErrorFun = window.onerror;
++      const cypressOnErrorFun = window.onerror
+       window.onerror = (message, source, lineno, colno, err) => {
+-        if (cypressOnErrorFun && !(err instanceof RedirectError || err instanceof AuthenticationError || err instanceof AuthorizationError || err instanceof NotFoundError)) {
+-          cypressOnErrorFun(message, source, lineno, colno, err);
++        if (
++          cypressOnErrorFun &&
++          !(
++            err instanceof RedirectError ||
++            err instanceof AuthenticationError ||
++            err instanceof AuthorizationError ||
++            err instanceof NotFoundError
++          )
++        ) {
++          cypressOnErrorFun(message, source, lineno, colno, err)
+         }
+-      };
++      }
+     }
+   }
+ }
+ 
+-export { AuthenticationError as A, CSRFTokenMismatchError as C, NotFoundError as N, OAuthError as O, PaginationArgumentError as P, RedirectError as R, AuthorizationError as a, registerBlitzErrorClasses as b, createClientPlugin as c, reduceBlitzClientPlugins as d, enhancePrisma as e, recursiveFormatZodErrors as f, formatZodError as g, isRouteUrlObject as i, merge as m, pipe as p, reduceBlitzServerPlugins as r, validateZodSchema as v };
++export {
++  AuthenticationError as A,
++  CSRFTokenMismatchError as C,
++  NotFoundError as N,
++  OAuthError as O,
++  PaginationArgumentError as P,
++  RedirectError as R,
++  AuthorizationError as a,
++  registerBlitzErrorClasses as b,
++  createClientPlugin as c,
++  reduceBlitzClientPlugins as d,
++  enhancePrisma as e,
++  recursiveFormatZodErrors as f,
++  formatZodError as g,
++  isRouteUrlObject as i,
++  merge as m,
++  pipe as p,
++  reduceBlitzServerPlugins as r,
++  validateZodSchema as v,
++}

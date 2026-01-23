@@ -21,7 +21,6 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/componen
 import {
   Popover,
   PopoverContent,
-  PopoverDescription,
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
