@@ -1,8 +1,8 @@
 import { Metadata } from "next"
 import Link from "next/link"
-import { Suspense } from "react"
 import { ProductsList } from "./components/ProductsList"
 import Breadcrumbs from "../../components/layout/Breadcrumbs"
+import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Products",

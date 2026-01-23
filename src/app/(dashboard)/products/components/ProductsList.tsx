@@ -1,13 +1,8 @@
 "use client"
-import { usePaginatedQuery } from "@blitzjs/rpc"
+
+import { useQuery } from "@blitzjs/rpc"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import getProducts from "../queries/getProducts"
-import { useSearchParams } from "next/navigation"
-import { usePathname } from "next/navigation"
-import { Route } from "next"
-import { Button } from "@/components/ui/button"
-import { ButtonGroup, ButtonGroupSeparator } from "@/components/ui/button-group"
 import { DataTable } from "@/src/app/components/DataTable"
 
 const ITEMS_PER_PAGE = 100
@@ -23,29 +18,12 @@ function getStockCount(product: any) {
 }
 
 export const ProductsList = () => {
-  const searchparams = useSearchParams()!
-  const page = Number(searchparams.get("page")) || 0
-  const [res] = usePaginatedQuery(getProducts, {
-    where: {},
+  const [res] = useQuery(getProducts, {
     orderBy: { id: "asc" },
-    skip: ITEMS_PER_PAGE * page,
     take: ITEMS_PER_PAGE,
   })
 
-  const { products, hasMore } = res ?? { products: [], hasMore: false }
-  const router = useRouter()
-  const pathname = usePathname()
-
-  const goToPreviousPage = () => {
-    const params = new URLSearchParams(searchparams)
-    params.set("page", (page - 1).toString())
-    router.push((pathname + "?" + params.toString()) as Route)
-  }
-  const goToNextPage = () => {
-    const params = new URLSearchParams(searchparams)
-    params.set("page", (page + 1).toString())
-    router.push((pathname + "?" + params.toString()) as Route)
-  }
+  const { products } = res ?? { products: [] }
 
   return (
     <div>
@@ -73,16 +51,6 @@ export const ProductsList = () => {
           { accessorKey: "totalStock", header: "Total Stock" },
         ]}
       />
-
-      <ButtonGroup>
-        <Button disabled={page === 0} onClick={goToPreviousPage} variant="outline">
-          Previous
-        </Button>
-        <ButtonGroupSeparator />
-        <Button disabled={!hasMore} onClick={goToNextPage} variant="outline">
-          Next
-        </Button>
-      </ButtonGroup>
     </div>
   )
 }

@@ -13,6 +13,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import Link from "next/link"
+import SearchBox, { SearchItem } from "./SearchBox"
 
 export function NavMain({
   items,
@@ -22,6 +23,7 @@ export function NavMain({
     url: string
     icon?: LucideIcon
     isActive?: boolean
+    searchThrough?: SearchItem[]
     items?: {
       title: string
       url: string
@@ -58,6 +60,11 @@ export function NavMain({
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}
+                  {item.searchThrough && (
+                    <SidebarMenuSubItem key={item.title + "-search"}>
+                      <SearchBox items={item.searchThrough} />
+                    </SidebarMenuSubItem>
+                  )}
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>
