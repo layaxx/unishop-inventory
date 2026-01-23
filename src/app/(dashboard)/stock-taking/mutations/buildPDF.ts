@@ -285,7 +285,7 @@ Trotz größter Sorgfalt können Abweichungen nicht vollständig ausgeschlossen 
   return await renderToPDF(latexText)
 })
 
-async function renderToPDF(latexText: string): Promise<Buffer> {
+async function renderToPDF(latexText: string): Promise<Uint8Array> {
   const tmpDirectory = await fs.mkdtemp(join(tmpdir(), "latex-inventory"))
   const texFilePath = join(tmpDirectory, "document.tex")
   const pdfFilePath = join(tmpDirectory, "document.pdf")

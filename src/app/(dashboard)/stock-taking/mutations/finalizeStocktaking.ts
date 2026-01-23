@@ -107,7 +107,7 @@ export default resolver.pipe(
 
       await db.auditLogStocktaking.update({
         where: { id: auditId },
-        data: { pdfReport: pdf },
+        data: { pdfReport: Buffer.from(pdf) },
       })
       console.log("Stocktaking PDF built and saved to audit log.")
     } catch (e) {

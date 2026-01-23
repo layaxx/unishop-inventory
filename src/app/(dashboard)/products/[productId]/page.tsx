@@ -11,6 +11,11 @@ import DeleteLink from "../components/DeleteLink"
 
 export async function generateMetadata(props: ProductPageProps): Promise<Metadata> {
   const params = await props.params
+  if (!params.productId || isNaN(Number(params.productId))) {
+    return {
+      title: "Product - Unknown",
+    }
+  }
   const product = await invoke(getProduct, { id: Number(params.productId) })
   return {
     title: `Product ${product.id} - ${product.name}`,
@@ -24,7 +29,11 @@ type ProductPageProps = {
 export default async function Page(props: ProductPageProps) {
   const params = await props.params
 
-  const product = await invoke(getProduct, { id: Number(params.productId) })
+  if (!params.productId) {
+    return <div>Product ID is required</div>
+  }
+
+  const product = await invoke(getProduct, { id: 1 })
 
   const types = await invoke(getProductModifierTypes, {
     productId: Number(params.productId),

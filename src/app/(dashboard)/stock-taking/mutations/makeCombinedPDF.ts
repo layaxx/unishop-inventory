@@ -23,7 +23,7 @@ export default resolver.pipe(resolver.authorize(), async (_data, ctx) => {
 
   await db.pDF.create({
     data: {
-      data: report,
+      data: Buffer.from(report),
       audits: { connect: audits.map((a) => ({ id: a!.id })) },
     },
   })
