@@ -1,73 +1,45 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
 import {
-  Command,
-  CommandList,
-  CommandEmpty,
-  CommandInput,
-  CommandGroup,
-  CommandItem,
-} from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { ChevronsUpDown } from "lucide-react"
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox"
 import { Route } from "next"
 import { useRouter } from "next/navigation"
-import React from "react"
-import { useState } from "react"
 
 export type SearchItem = {
-  id: string | number
+  id: number
   title: string
   url: Route
 }
 
-export default function SearchBox({ items }: { items: SearchItem[] }) {
-  const [open, setOpen] = useState(false)
-
-  const runCommand = React.useCallback((command: () => void) => {
-    setOpen(false)
-    command()
-  }, [])
-
+export default function SearchBox({ items }: { items: Array<SearchItem> }) {
   const router = useRouter()
-
-  // TODO: fix accessibility issues here
-
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          role="combobox"
-          aria-expanded={open}
-          className="w-50 justify-between"
-        >
-          Search...
-          <ChevronsUpDown className="opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-50 p-0">
-        <Command>
-          <CommandInput placeholder="Search..." className="h-9" />
-          <CommandList>
-            <CommandEmpty>No entry.</CommandEmpty>
-            <CommandGroup>
-              {items.map((item, index) => (
-                <CommandItem
-                  key={String(item.id)}
-                  value={item.title}
-                  onSelect={() => {
-                    runCommand(() => router.push(item.url))
-                  }}
-                >
-                  {index}. {item.title}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <Combobox<SearchItem>
+      items={items.map(({ id, title, url }) => ({ label: title, id, url }))}
+      itemToStringValue={(item: SearchItem) => item.title}
+      onValueChange={(item) => {
+        if (item) {
+          router.push(item.url)
+        }
+      }}
+    >
+      <ComboboxInput placeholder="Search…" />
+      <ComboboxContent>
+        <ComboboxEmpty>No items found.</ComboboxEmpty>
+        <ComboboxList>
+          {(country) => (
+            <ComboboxItem key={country.id} value={country}>
+              {country.label}
+            </ComboboxItem>
+          )}
+        </ComboboxList>
+      </ComboboxContent>
+    </Combobox>
   )
 }

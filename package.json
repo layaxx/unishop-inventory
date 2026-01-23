@@ -10,8 +10,7 @@
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts,.tsx .",
     "test": "vitest run --passWithNoTests --no-file-parallelism",
     "test:watch": "vitest",
-    "prepare": "husky install",
-    "postinstall": "patch-package"
+    "prepare": "husky install"
   },
   "prisma": {
     "schema": "db/schema.prisma"
@@ -26,6 +25,7 @@
     ]
   },
   "dependencies": {
+    "@base-ui/react": "^1.1.0",
     "@blitzjs/auth": "3.0.2",
     "@blitzjs/next": "3.0.2",
     "@blitzjs/rpc": "3.0.2",
@@ -37,11 +37,11 @@
     "@radix-ui/react-label": "2.1.8",
     "@radix-ui/react-popover": "1.1.15",
     "@radix-ui/react-separator": "1.1.8",
-    "@radix-ui/react-slot": "1.2.4",
+    "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "1.2.8",
     "@tailwindcss/postcss": "4.1.18",
     "@tanstack/react-table": "8.21.3",
-    "blitz": "3.0.2",
+    "blitz": "patch:blitz@npm%3A3.0.2#~/.yarn/patches/blitz-npm-3.0.2-974a76cb2f.patch",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
@@ -49,7 +49,6 @@
     "formik": "2.4.9",
     "lucide-react": "0.562.0",
     "next": "15.4.10",
-    "patch-package": "8.0.1",
     "postcss": "8.5.6",
     "postinstall-postinstall": "2.1.0",
     "prisma": "5.20",
@@ -87,5 +86,5 @@
     "vite-tsconfig-paths": "3.6.0",
     "vitest": "4.0.7"
   },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@4.12.0"
 }
