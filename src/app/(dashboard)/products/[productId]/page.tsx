@@ -33,7 +33,7 @@ export default async function Page(props: ProductPageProps) {
     return <div>Product ID is required</div>
   }
 
-  const product = await invoke(getProduct, { id: Number(params.productId) })
+  const product = await invoke(getProduct, { id: 1 })
 
   const types = await invoke(getProductModifierTypes, {
     productId: Number(params.productId),

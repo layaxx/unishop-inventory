@@ -1,13 +1,11 @@
-import { enhancePrisma } from "blitz"
-import { PrismaPg } from "@prisma/adapter-pg"
-import { PrismaClient } from "db/generated/prisma/client"
+import { enhancePrisma, NotFoundError } from "blitz"
+import { PrismaClient } from "@prisma/client"
+import SuperJson from "superjson"
 
 const EnhancedPrisma = enhancePrisma(PrismaClient)
 
-export * from "db/generated/prisma/client"
-
-const adapter = new PrismaPg({
-  connectionString: process.env.DATABASE_URL,
-})
-const db = new EnhancedPrisma({ adapter })
+export * from "@prisma/client"
+const db = new EnhancedPrisma()
 export default db
+
+SuperJson.registerClass(NotFoundError)

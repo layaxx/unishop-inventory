@@ -1,7 +1,7 @@
 import Form, { FORM_ERROR } from "@/src/app/components/Form"
 import LabeledTextField from "@/src/app/components/LabeledTextField"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
-import type { ProductModifierType, ProductModifierValue } from "db"
+import { ProductModifierType, ProductModifierValue } from "@prisma/client"
 import updateProductModifierValueMutation from "../../mutations/updateProductModifierValue"
 import React from "react"
 import { UpdateProductModifierValueSchema } from "../../schemas"

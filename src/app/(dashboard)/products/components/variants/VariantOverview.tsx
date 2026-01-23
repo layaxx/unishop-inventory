@@ -2,7 +2,7 @@
 
 import { FC } from "react"
 import { DataTable } from "@/src/app/components/DataTable"
-import type { ProductModifierType, ProductVariant, Location } from "db"
+import { ProductModifierType, ProductVariant, Location } from "@prisma/client"
 
 const VariantOverview: FC<{
   locations: Location[]
