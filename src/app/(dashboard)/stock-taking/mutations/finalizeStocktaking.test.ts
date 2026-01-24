@@ -319,4 +319,40 @@ describe("finalizeStocktaking mutation", () => {
     expect(movementForVariant2?.toId).toBe(ids.locationId)
     expect(movementForVariant2?.quantity).toBe(35) // 0 -> 35
   })
+
+  it("creates stock levels if necessary", async () => {
+    expect(ids.variantIds.length).toBe(2)
+
+    // delete existing stock levels
+    await db.stockLevel.deleteMany({ where: { locationId: ids.locationId } })
+
+    await db.inventoryEntry.createMany({
+      data: [
+        {
+          locationId: ids.locationId,
+          variantId: ids.variantIds[0],
+          quantity: 12,
+        },
+        {
+          locationId: ids.locationId,
+          variantId: ids.variantIds[1],
+          quantity: 34,
+        },
+      ],
+    })
+
+    await finalizeStocktaking({ locationId: ids.locationId }, mockCtx)
+
+    const stockLevels = await db.stockLevel.findMany({ where: { locationId: ids.locationId } })
+    expect(stockLevels.length).toBe(2)
+
+    const stockForVariant1 = stockLevels.find((s) => s.variantId === ids.variantIds[0])
+    const stockForVariant2 = stockLevels.find((s) => s.variantId === ids.variantIds[1])
+
+    expect(stockForVariant1).toBeDefined()
+    expect(stockForVariant1?.quantity).toBe(12)
+
+    expect(stockForVariant2).toBeDefined()
+    expect(stockForVariant2?.quantity).toBe(34)
+  })
 })

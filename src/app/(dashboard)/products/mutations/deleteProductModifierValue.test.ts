@@ -271,4 +271,10 @@ describe("deleteProductModifierValue mutation", () => {
     expect(remainingStockLevels.length).toBe(1)
     expect(remainingStockLevels[0].variantId).toBe(variant2.id)
   })
+
+  it("throws if modifier value is not found", async () => {
+    await expect(deleteProductModifierValue({ id: 42 }, mockCtx)).rejects.toThrowError(
+      "Modifier value not found"
+    )
+  })
 })

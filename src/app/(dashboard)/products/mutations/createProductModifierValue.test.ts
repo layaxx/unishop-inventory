@@ -12,6 +12,14 @@ async function makeProduct() {
   })
 }
 
+async function makeLocation() {
+  return await db.location.create({
+    data: {
+      name: "Main Warehouse",
+    },
+  })
+}
+
 async function makeProductModifierType(productId?: number) {
   return await db.productModifierType.create({
     data: {
@@ -44,11 +52,20 @@ beforeEach(async () => {
   const modifierType = await makeProductModifierType(productId)
   modifierTypeId = modifierType.id
   await makeDefaultVariant(productId)
+  await makeLocation()
 })
 
 describe("createProductModifierValue mutation", () => {
   it("throws error if no ProductVariant exists", async () => {
     await db.productVariant.deleteMany({}) // remove all variants
+
+    await expect(
+      createProductModifierValue({ modifierTypeId, value: "XS" }, mockCtx)
+    ).rejects.toThrow()
+  })
+
+  it("throws error if productModifierType does not exist", async () => {
+    await db.productModifierType.deleteMany({}) // remove all types
 
     await expect(
       createProductModifierValue({ modifierTypeId, value: "XS" }, mockCtx)

@@ -20,12 +20,13 @@ export default resolver.pipe(
   resolver.zod(CreateProductModifierValueSchema),
   resolver.authorize(),
   async (input) => {
-    const productId = await db.productModifierType.findUnique({
+    const type = await db.productModifierType.findUnique({
       where: { id: input.modifierTypeId },
-      select: { productId: true },
     })
 
-    if (typeof productId?.productId !== "number") {
+    if (!type) throw new Error("Modifier type not found")
+
+    if (typeof type.productId !== "number") {
       throw new Error("ProductID could not be found")
     }
 
@@ -41,7 +42,7 @@ export default resolver.pipe(
 
     const otherTypes = await db.productModifierType.findMany({
       where: {
-        productId: productId.productId,
+        productId: type.productId,
         id: { not: input.modifierTypeId },
       },
       include: { values: true },
@@ -55,7 +56,7 @@ export default resolver.pipe(
       // just add to every variant of the product
 
       const productVariants = await db.productVariant.findMany({
-        where: { productId: productId.productId },
+        where: { productId: type.productId },
       })
 
       if (productVariants.length === 0) {
@@ -75,11 +76,6 @@ export default resolver.pipe(
         )
       )
     } else {
-      const type = await db.productModifierType.findUnique({
-        where: { id: input.modifierTypeId },
-      })
-      if (!type) throw new Error("Modifier type not found")
-
       const combinations = getCombinations([
         ...otherTypes.map((type) => ({
           name: type.name,
@@ -91,7 +87,7 @@ export default resolver.pipe(
         combinations.map(async (combination) => {
           await db.productVariant.create({
             data: {
-              productId: productId.productId,
+              productId: type.productId,
               modifierValues: {
                 connect: [...Object.values(combination).map((id) => ({ id })), { id: newValue.id }],
               },

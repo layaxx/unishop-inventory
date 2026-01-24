@@ -10,6 +10,7 @@
     "lint": "tsc && eslint --ignore-path .gitignore --ext .js,.ts,.tsx .",
     "test": "vitest run --passWithNoTests --no-file-parallelism",
     "test:watch": "vitest",
+    "test:coverage": "yarn test --coverage",
     "prepare": "husky install"
   },
   "prisma": {
@@ -69,6 +70,7 @@
     "@types/react": "19.0.3",
     "@typescript-eslint/eslint-plugin": "5.42.1",
     "@vitejs/plugin-react": "2.2.0",
+    "@vitest/coverage-v8": "4.0.7",
     "ajv": "^7.0.0",
     "eslint": "8.27.0",
     "eslint-config-next": "12.3.1",
