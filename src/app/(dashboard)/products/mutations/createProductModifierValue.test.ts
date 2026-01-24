@@ -1,7 +1,8 @@
-import { describe, it, beforeEach } from "vitest"
+import { describe, it, beforeEach, afterEach } from "vitest"
 import db from "db"
 import createProductModifierValue from "./createProductModifierValue"
 import { mockCtx } from "@/test/createMockContext"
+import { dbReset } from "@/test/dbreset"
 
 async function makeProduct() {
   return await db.product.create({
@@ -36,7 +37,7 @@ let modifierTypeId: number = 0
 let productId: number = 0
 
 beforeEach(async () => {
-  await db.$reset()
+  await dbReset()
 
   const product = await makeProduct()
   productId = product.id

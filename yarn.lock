@@ -6103,7 +6103,7 @@ __metadata:
 
 "blitz@patch:blitz@npm%3A3.0.2#~/.yarn/patches/blitz-npm-3.0.2-974a76cb2f.patch":
   version: 3.0.2
-  resolution: "blitz@patch:blitz@npm%3A3.0.2#~/.yarn/patches/blitz-npm-3.0.2-974a76cb2f.patch::version=3.0.2&hash=fc0d46"
+  resolution: "blitz@patch:blitz@npm%3A3.0.2#~/.yarn/patches/blitz-npm-3.0.2-974a76cb2f.patch::version=3.0.2&hash=194bca"
   dependencies:
     "@blitzjs/generator": "npm:3.0.2"
     "@mrleebo/prisma-ast": "npm:0.4.1"
@@ -6155,7 +6155,7 @@ __metadata:
     watchpack: "npm:2.1.1"
   bin:
     blitz: bin/blitz
-  checksum: 10c0/b8348d2308b495ec2af7553e7f77509c3f24c86b7d0d180228a1afa0522658d4792d1aa474ff915442151f881e2b538c99751070c1ea87699a5ff031437d682f
+  checksum: 10c0/986f675a49cb2be21028650329b65a429df5f892a62e155b6d22e1f76bed9b27a3bac5dd280e966f60eae077ceb2648a8ba90955e221fc159f250d7d7d87fd41
   languageName: node
   linkType: hard
 

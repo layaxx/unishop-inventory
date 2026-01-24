@@ -2,6 +2,7 @@ import { describe, it, beforeEach } from "vitest"
 import db from "db"
 import { mockCtx } from "@/test/createMockContext"
 import deleteProductModifierValue from "./deleteProductModifierValue"
+import { dbReset } from "@/test/dbreset"
 
 describe("deleteProductModifierValue mutation", () => {
   let productId: number = 0
@@ -10,7 +11,7 @@ describe("deleteProductModifierValue mutation", () => {
   let variantId: number = 0
 
   beforeEach(async () => {
-    await db.$reset()
+    await dbReset()
 
     const product = await db.product.create({
       data: {

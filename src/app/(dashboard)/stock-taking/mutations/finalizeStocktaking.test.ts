@@ -2,6 +2,7 @@ import db from "@/db"
 import finalizeStocktaking from "./finalizeStocktaking"
 import { mockCtx } from "@/test/createMockContext"
 import { vi } from "vitest"
+import { dbReset } from "@/test/dbreset"
 
 // mock buildPDF mutation
 vi.mock("./buildPDF", () => {
@@ -13,7 +14,7 @@ vi.mock("./buildPDF", () => {
 })
 
 async function makeSampleData() {
-  const user = await db.user.create({ data: { email: "x@example.com" } })
+  const user = await db.user.create({ data: { email: "x@example.com", id: 1 } })
   const location = await db.location.create({ data: { name: "Sample Location" } })
   const product = await db.product.create({ data: { name: "Sample Product" } })
   const type = await db.productModifierType.create({
@@ -46,7 +47,7 @@ async function makeSampleData() {
 describe("finalizeStocktaking mutation", () => {
   let ids = { locationId: -1, productId: -1, variantIds: [] as number[] }
   beforeEach(async () => {
-    await db.$reset()
+    await dbReset()
     ids = await makeSampleData()
   })
 
