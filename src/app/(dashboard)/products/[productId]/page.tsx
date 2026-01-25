@@ -1,13 +1,9 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { invoke } from "src/app/blitz-server"
-import Image from "next/image"
 import Link from "next/link"
 
 import getProduct from "../queries/getProduct"
-import getProductModifierTypes from "../queries/getProductModifierTypes"
-import getProductVariants from "../queries/getProductVariants"
-import getLocations from "../../locations/queries/getLocations"
 
 import Modifiers from "../components/variants/Modifiers"
 import VariantOverview from "../components/variants/VariantOverview"
@@ -40,12 +36,6 @@ export default async function Page(props: ProductPageProps) {
   // Fetch all data in parallel
   const [product, types, variants, locations] = await Promise.all([
     invoke(getProduct, { id }),
-    invoke(getProductModifierTypes, { productId: id }),
-    invoke(getProductVariants, {
-      where: { productId: id },
-      include: { modifierValues: true, stockLevels: true },
-    }),
-    invoke(getLocations, { take: 100 }),
   ]).catch(() => [null, null, null, null])
 
   if (!product) notFound()
@@ -59,15 +49,13 @@ export default async function Page(props: ProductPageProps) {
 
         {product.image && <img src={product.image} alt={product.name} width={200} />}
 
-        <Link href={`/products/${product.id}/edit`}>Edit</Link>
+        <Link href={`/products/${product.id}/edit`} className="underline">
+          Edit
+        </Link>
         <DeleteLink productId={product.id} />
 
-        <Modifiers types={types ?? []} productId={product.id} />
-        <VariantOverview
-          locations={locations?.locations ?? []}
-          types={types ?? []}
-          variants={variants?.productVariants ?? []}
-        />
+        <Modifiers productId={product.id} />
+        <VariantOverview productId={product.id} />
       </div>
     </div>
   )

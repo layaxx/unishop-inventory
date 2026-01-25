@@ -17,28 +17,30 @@ import {
 import { Button } from "@/components/ui/button"
 import deleteProductModifierValueMutation from "../../mutations/deleteProductModifierValue"
 import deleteProductModifierTypeMutation from "../../mutations/deleteProductModifierType"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
-  ProductModifierType,
-  ProductModifierValue,
-  ProductVariant,
-  StockLevel,
-} from "@prisma/client"
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { MenuIcon } from "lucide-react"
 
-const Modifiers: FC<{
-  types: Array<
-    ProductModifierType & {
-      values: Array<
-        ProductModifierValue & {
-          ProductVariant: Array<ProductVariant & { stockLevels: StockLevel[] }>
-        }
-      >
-    }
-  >
+type Props = {
   productId: number
-}> = ({ types, productId }) => {
-  const [deleteProductModifierValue] = useMutation(deleteProductModifierValueMutation)
-  const [deleteProductModifierType] = useMutation(deleteProductModifierTypeMutation)
+}
+
+const Modifiers: FC<Props> = ({ productId }) => {
+  const [types] = useQuery(getProductModifierTypes, { productId })
+
+  const [deleteProductModifierValue] = useMutation(deleteProductModifierValueMutation, {
+    throwOnError: false,
+  })
+  const [deleteProductModifierType] = useMutation(deleteProductModifierTypeMutation, {
+    throwOnError: false,
+  })
 
   const handleOnTypeDelete = async (id: number) => {
     try {
@@ -49,7 +51,7 @@ const Modifiers: FC<{
       await deleteProductModifierType({ id })
       invalidateQuery(getProductModifierTypes)
     } catch (error) {
-      console.error("Failed to delete modifier value:", error)
+      console.error("Failed to delete modifier type:", error)
     }
   }
 
@@ -68,67 +70,81 @@ const Modifiers: FC<{
 
   return (
     <>
-      <h2 className="font-bold text-4xl">Modifiers</h2>
-      <AddModifier productId={productId} />
+      <div className="flex">
+        <h2 className="font-bold text-4xl">Modifiers</h2>
+        <AddModifier productId={productId} />
+      </div>
 
       <div className="flex flex-wrap space-x-4">
         {types?.map((type) => (
-          <React.Fragment key={type.id}>
-            <Card className="grow">
-              <CardHeader>
-                <CardTitle>{type.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {type.values.length === 0 ? (
-                  <>
-                    <p>No modifier values for this type.</p>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleOnTypeDelete(type.id)}
-                    >
-                      Remove this modifier type.
+          <Card className="grow" key={type.id}>
+            <CardHeader>
+              <CardTitle className="text-2xl">{type.name}</CardTitle>
+              <CardAction>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline">
+                      <MenuIcon />
                     </Button>
-                  </>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Value</TableHead>
-                        <TableHead className="text-right">Stock Total</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {type.values.map((value) => (
-                        <TableRow key={value.id}>
-                          <TableCell className="font-medium">{value.value}</TableCell>
-                          <TableCell className="text-right">
-                            {value.ProductVariant.reduce(
-                              (prev, variant) =>
-                                prev +
-                                variant.stockLevels.reduce(
-                                  (prev_, curr) => prev_ + curr.quantity,
-                                  0
-                                ),
-                              0
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button onClick={() => handleOnDelete(value.id)} size="sm">
-                              Delete
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
+                  </PopoverTrigger>
+                  <PopoverContent align="start">
+                    <PopoverHeader>
+                      <PopoverTitle>Dimensions</PopoverTitle>
+                      <PopoverDescription>Set the dimensions for the layer.</PopoverDescription>
+                    </PopoverHeader>
+                    <div className="flex flex-col gap-2 items-start">
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleOnTypeDelete(type.id)}
+                        disabled={type.values.length > 0}
+                      >
+                        Remove this modifier type.
+                      </Button>
 
-                <AddModifierValue modifierTypeId={type.id} />
-              </CardContent>
-            </Card>
-          </React.Fragment>
+                      <AddModifierValue modifierTypeId={type.id} />
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </CardAction>
+            </CardHeader>
+
+            <CardContent>
+              {type.values.length === 0 ? (
+                <p>No modifier values for this type.</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Value</TableHead>
+                      <TableHead className="text-right">Stock Total</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {type.values.map((value) => (
+                      <TableRow key={value.id}>
+                        <TableCell className="font-medium">{value.value}</TableCell>
+                        <TableCell className="text-right">
+                          {value.ProductVariant.reduce(
+                            (prev, variant) =>
+                              prev +
+                              variant.stockLevels.reduce((prev_, curr) => prev_ + curr.quantity, 0),
+                            0
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button onClick={() => handleOnDelete(value.id)} size="sm">
+                            Delete
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
         ))}
       </div>
     </>

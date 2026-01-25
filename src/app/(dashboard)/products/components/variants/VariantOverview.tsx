@@ -2,19 +2,25 @@
 
 import { FC } from "react"
 import { DataTable } from "@/src/app/components/DataTable"
-import { ProductModifierType, ProductVariant, Location } from "@prisma/client"
+import { useQuery } from "@blitzjs/rpc"
+import getLocations from "../../../locations/queries/getLocations"
+import getProductModifierTypes from "../../queries/getProductModifierTypes"
+import getProductVariants from "../../queries/getProductVariants"
 
-const VariantOverview: FC<{
-  locations: Location[]
-  types: ProductModifierType[]
-  variants: ProductVariant[]
-}> = ({ locations, types, variants }) => {
+const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
+  const [types] = useQuery(getProductModifierTypes, { productId })
+  const [variants] = useQuery(getProductVariants, {
+    where: { productId },
+    include: { modifierValues: true, stockLevels: true },
+  })
+  const [locations] = useQuery(getLocations, { take: 100 })
+
   return (
     <div className="mt-4">
       <h2 className="font-bold text-4xl">Variants</h2>
       <DataTable
         data={
-          variants.map((x) => {
+          variants?.productVariants.map((x) => {
             const stockLevels = Array.isArray((x as any).stockLevels) ? (x as any).stockLevels : []
             const totalStock = stockLevels.reduce(
               (acc: number, level: any) => acc + (level?.quantity ?? 0),
@@ -24,7 +30,7 @@ const VariantOverview: FC<{
             const obj: Record<string, string | number> = {
               totalStock,
             }
-            for (const location of locations ?? []) {
+            for (const location of locations?.locations ?? []) {
               const level = stockLevels.find((sl: any) => sl.locationId === location.id)
               obj["loc" + location.id] = level ? level.quantity : -999
             }
@@ -45,10 +51,10 @@ const VariantOverview: FC<{
           }) ?? []
         }
         columns={[
-          ...((types ?? []).map((type) => ({
+          ...(types ?? []).map((type) => ({
             accessorKey: "mod" + type.id,
             header: type.name,
-          })) as any),
+          })),
           ...(types?.length === 0
             ? [
                 {
@@ -57,7 +63,7 @@ const VariantOverview: FC<{
                 },
               ]
             : []),
-          ...(locations.map((location) => ({
+          ...(locations?.locations.map((location) => ({
             accessorKey: `loc${location.id}`,
             header: `Stock (${location.name})`,
           })) ?? []),

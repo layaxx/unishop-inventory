@@ -8,6 +8,10 @@ import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
 import { Button } from "@/components/ui/button"
 import getProductVariants from "../../queries/getProductVariants"
+import { PlusIcon, XIcon } from "lucide-react"
+import { Formik } from "formik"
+import { validateZodSchema } from "blitz"
+import LabeledTextFieldWithSubmit from "@/src/app/components/LabeledTextFieldWithSubmit"
 
 const AddModifier: React.FC<{ modifierTypeId: number }> = ({ modifierTypeId }) => {
   const [showForm, setShowForm] = React.useState(false)
@@ -17,29 +21,46 @@ const AddModifier: React.FC<{ modifierTypeId: number }> = ({ modifierTypeId }) =
   return (
     <>
       {showForm ? (
-        <Form
-          submitText="Create ModifierValue"
+        <Formik
           schema={CreateProductModifierValueSchema}
+          validate={validateZodSchema(CreateProductModifierValueSchema)}
           initialValues={{ value: "", modifierTypeId }}
           onSubmit={async (values) => {
             try {
               await createProductModifierValue(values)
-              invalidateQuery(getProductModifierTypes)
-              invalidateQuery(getProductVariants)
+              await Promise.all([
+                invalidateQuery(getProductModifierTypes),
+                invalidateQuery(getProductVariants),
+              ])
+              setShowForm(false)
             } catch (error: any) {
               console.error(error)
-              return {
-                [FORM_ERROR]: error.toString(),
-              }
             }
-            setShowForm(false)
           }}
         >
-          <LabeledTextField name="value" label="ModifierValue" placeholder="Value" />
-        </Form>
+          {({ handleSubmit }) => (
+            <form onSubmit={handleSubmit} className="form flex gap-2 items-center">
+              <LabeledTextFieldWithSubmit
+                name="value"
+                label="Value"
+                placeholder="Value"
+                submitButtonChildren={<PlusIcon />}
+              />
+              <Button
+                onClick={() => setShowForm(false)}
+                variant="outline"
+                size="icon"
+                aria-label="Add Modifier Value"
+              >
+                <XIcon />
+              </Button>
+            </form>
+          )}
+        </Formik>
       ) : (
-        <Button onClick={() => setShowForm(true)} size="sm" variant="outline">
-          Add ModifierValue
+        <Button onClick={() => setShowForm(true)} variant="outline" aria-label="Add Modifier Value">
+          Add Modifier Value
+          <PlusIcon />
         </Button>
       )}
     </>

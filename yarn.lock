@@ -3260,7 +3260,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@radix-ui/react-popover@npm:1.1.15":
+"@radix-ui/react-popover@npm:^1.1.15":
   version: 1.1.15
   resolution: "@radix-ui/react-popover@npm:1.1.15"
   dependencies:
@@ -9698,7 +9698,7 @@ __metadata:
     "@radix-ui/react-dialog": "npm:1.1.15"
     "@radix-ui/react-dropdown-menu": "npm:2.1.16"
     "@radix-ui/react-label": "npm:2.1.8"
-    "@radix-ui/react-popover": "npm:1.1.15"
+    "@radix-ui/react-popover": "npm:^1.1.15"
     "@radix-ui/react-separator": "npm:1.1.8"
     "@radix-ui/react-slot": "npm:^1.2.4"
     "@radix-ui/react-tooltip": "npm:1.2.8"

@@ -1,12 +1,15 @@
 "use client"
-import Form, { FORM_ERROR } from "@/src/app/components/Form"
-import LabeledTextField from "@/src/app/components/LabeledTextField"
+
 import React from "react"
 import createProductModifierTypeMutation from "../../mutations/createProductModifierType"
 import { CreateProductModifierTypeSchema } from "../../schemas"
 import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
 import { Button } from "@/components/ui/button"
+import { validateZodSchema } from "blitz"
+import { Formik } from "formik"
+import { PlusIcon, XIcon } from "lucide-react"
+import LabeledTextFieldWithSubmit from "@/src/app/components/LabeledTextFieldWithSubmit"
 
 const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
   const [showForm, setShowForm] = React.useState(false)
@@ -14,12 +17,12 @@ const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
   const [createProductModifierType] = useMutation(createProductModifierTypeMutation)
 
   return (
-    <div className="mt-4">
+    <div className="ml-2">
       {showForm ? (
-        <Form
-          submitText="Create ModifierType"
+        <Formik
           schema={CreateProductModifierTypeSchema}
           initialValues={{ name: "", productId }}
+          validate={validateZodSchema(CreateProductModifierTypeSchema)}
           onSubmit={async (values) => {
             try {
               await createProductModifierType(values)
@@ -27,17 +30,36 @@ const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
               setShowForm(false)
             } catch (error: any) {
               console.error(error)
-              return {
-                [FORM_ERROR]: error.toString(),
-              }
             }
           }}
         >
-          <LabeledTextField name="name" label="Name" placeholder="Name" />
-        </Form>
+          {({ handleSubmit }) => (
+            <form onSubmit={handleSubmit} className="form flex gap-2 items-center">
+              <LabeledTextFieldWithSubmit
+                name="name"
+                label="Name"
+                placeholder="Name"
+                submitButtonChildren={<PlusIcon />}
+              />
+              <Button
+                onClick={() => setShowForm(false)}
+                variant="outline"
+                size="icon"
+                aria-label="Add Modifier Type"
+              >
+                <XIcon />
+              </Button>
+            </form>
+          )}
+        </Formik>
       ) : (
-        <Button onClick={() => setShowForm(true)} size="sm" variant="outline">
-          Add Modifier Type
+        <Button
+          onClick={() => setShowForm(true)}
+          variant="outline"
+          size="icon"
+          aria-label="Add Modifier Type"
+        >
+          <PlusIcon />
         </Button>
       )}
     </div>
