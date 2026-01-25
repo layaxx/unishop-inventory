@@ -26,7 +26,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { MenuIcon } from "lucide-react"
+import { MenuIcon, TrashIcon } from "lucide-react"
 
 type Props = {
   productId: number
@@ -89,8 +89,7 @@ const Modifiers: FC<Props> = ({ productId }) => {
                   </PopoverTrigger>
                   <PopoverContent align="start">
                     <PopoverHeader>
-                      <PopoverTitle>Dimensions</PopoverTitle>
-                      <PopoverDescription>Set the dimensions for the layer.</PopoverDescription>
+                      <PopoverTitle>Actions</PopoverTitle>
                     </PopoverHeader>
                     <div className="flex flex-col gap-2 items-start">
                       <Button
@@ -134,9 +133,27 @@ const Modifiers: FC<Props> = ({ productId }) => {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button onClick={() => handleOnDelete(value.id)} size="sm">
-                            Delete
-                          </Button>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" size="icon-sm">
+                                <MenuIcon />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent align="start">
+                              <PopoverHeader>
+                                <PopoverTitle>Actions</PopoverTitle>
+                              </PopoverHeader>
+                              <div className="flex flex-col gap-2 items-start">
+                                <Button
+                                  onClick={() => handleOnDelete(value.id)}
+                                  variant="destructive"
+                                  size="sm"
+                                >
+                                  Delete <TrashIcon />
+                                </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </TableCell>
                       </TableRow>
                     ))}

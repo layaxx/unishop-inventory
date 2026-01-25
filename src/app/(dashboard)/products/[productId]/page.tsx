@@ -4,7 +4,6 @@ import { invoke } from "src/app/blitz-server"
 import Link from "next/link"
 
 import getProduct from "../queries/getProduct"
-
 import Modifiers from "../components/variants/Modifiers"
 import VariantOverview from "../components/variants/VariantOverview"
 import DeleteLink from "../components/DeleteLink"
@@ -33,10 +32,7 @@ export default async function Page(props: ProductPageProps) {
 
   if (isNaN(id)) notFound()
 
-  // Fetch all data in parallel
-  const [product, types, variants, locations] = await Promise.all([
-    invoke(getProduct, { id }),
-  ]).catch(() => [null, null, null, null])
+  const product = await invoke(getProduct, { id }).catch(() => null)
 
   if (!product) notFound()
 
@@ -44,7 +40,6 @@ export default async function Page(props: ProductPageProps) {
     <div>
       <div>
         <h1 className="text-5xl font-bold">{product.name}</h1>
-        <p>Product {product.id}</p>
         <p>{product.description}</p>
 
         {product.image && <img src={product.image} alt={product.name} width={200} />}
