@@ -277,4 +277,25 @@ describe("deleteProductModifierValue mutation", () => {
       "Modifier value not found"
     )
   })
+
+  it("deletes modifier value when it is the last of its type even though stock levels exist, keeping variant", async () => {
+    await db.stockLevel.updateMany({
+      data: { quantity: 5 },
+      where: { variantId },
+    })
+
+    await deleteProductModifierValue({ id: valueId }, mockCtx)
+
+    const remainingValues = await db.productModifierValue.findMany({})
+    expect(remainingValues.length).toBe(0)
+
+    const remainingVariants = await db.productVariant.findMany({
+      include: { modifierValues: true, stockLevels: true },
+    })
+    expect(remainingVariants.length).toBe(1)
+    expect(remainingVariants[0].id).toBe(variantId)
+    expect(remainingVariants[0].modifierValues.length).toBe(0)
+    expect(remainingVariants[0].stockLevels.length).toBe(1)
+    expect(remainingVariants[0].stockLevels[0].quantity).toBe(5)
+  })
 })
