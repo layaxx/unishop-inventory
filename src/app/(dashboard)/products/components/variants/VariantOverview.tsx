@@ -5,55 +5,78 @@ import { DataTable } from "@/src/app/components/DataTable"
 import { useQuery } from "@blitzjs/rpc"
 import getLocations from "../../../locations/queries/getLocations"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
-import getProductVariants from "../../queries/getProductVariants"
+import React from "react"
+import getProductVariantsWithStocksAndValues from "../../queries/getProductVariantsWithStocksAndValues"
+import { makeVariantSortFunction } from "@/src/lib/variant"
 
 const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
   const [types] = useQuery(getProductModifierTypes, { productId })
-  const [variants] = useQuery(getProductVariants, {
+  const [variants] = useQuery(getProductVariantsWithStocksAndValues, {
     where: { productId },
-    include: { modifierValues: true, stockLevels: true },
   })
   const [locations] = useQuery(getLocations, { take: 100 })
+
+  const tableData = React.useMemo(() => {
+    const temp =
+      variants?.productVariants.sort(makeVariantSortFunction(types)).map((variant) => {
+        const stockLevels = variant.stockLevels ?? []
+        const totalStock = stockLevels.reduce(
+          (acc: number, level: any) => acc + (level?.quantity ?? 0),
+          0
+        )
+
+        const obj: Record<string, string | number | number[]> = {
+          totalStock,
+        }
+        for (const location of locations?.locations ?? []) {
+          const level = stockLevels.find((sl) => sl.locationId === location.id)
+          obj["loc" + location.id] = level ? level.quantity : -999
+        }
+
+        types?.forEach((type, index) => {
+          const value = variant.modifierValues?.find((mv) => mv.modifierTypeId === type.id)?.value
+
+          obj["mod" + index] = value || "(Default)"
+        })
+
+        if (types?.length === 0) {
+          obj["x"] = "(Default)"
+        }
+        return obj
+      }) ?? []
+
+    temp.sort()
+
+    let previousValue: string | number | number[] | undefined = undefined
+    return temp.map((x, _idx, array) => {
+      x.rowspan = 1
+      const thisValue = x["mod0"]
+      if (thisValue === previousValue) {
+        x.rowspan = 0
+      } else {
+        // number of identical values
+        x.rowspan = array.filter((v) => {
+          return v["mod0"] === thisValue
+        }).length
+      }
+      previousValue = thisValue
+
+      return x
+    })
+  }, [variants, types, locations])
+
+  console.log(tableData)
 
   return (
     <div className="mt-4">
       <h2 className="font-bold text-4xl">Variants</h2>
       <DataTable
-        data={
-          variants?.productVariants.map((x) => {
-            const stockLevels = Array.isArray((x as any).stockLevels) ? (x as any).stockLevels : []
-            const totalStock = stockLevels.reduce(
-              (acc: number, level: any) => acc + (level?.quantity ?? 0),
-              0
-            )
-
-            const obj: Record<string, string | number> = {
-              totalStock,
-            }
-            for (const location of locations?.locations ?? []) {
-              const level = stockLevels.find((sl: any) => sl.locationId === location.id)
-              obj["loc" + location.id] = level ? level.quantity : -999
-            }
-
-            for (const type of types ?? []) {
-              const value = ((x as any).modifierValues as any[] | undefined)?.find(
-                (mv) => mv.modifierTypeId === type.id
-              )?.value
-
-              obj["mod" + type.id] = value || "(Default)"
-            }
-
-            if (types?.length === 0) {
-              obj["x"] = "(Default)"
-            }
-
-            return obj
-          }) ?? []
-        }
+        data={tableData}
         columns={[
-          ...(types ?? []).map((type) => ({
-            accessorKey: "mod" + type.id,
+          ...(types ?? []).map((type, idx) => ({
+            accessorKey: "mod" + idx,
             header: type.name,
+            enableRowSpan: true,
           })),
           ...(types?.length === 0
             ? [

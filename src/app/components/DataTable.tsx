@@ -11,12 +11,17 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-interface DataTableProps<TData, TValue> {
+type DataType = Record<string, any> & { rowspan?: number }
+
+interface DataTableProps<TData extends DataType, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
 
-export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData, TValue>) {
+export function DataTable<TData extends DataType, TValue>({
+  columns,
+  data,
+}: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
@@ -45,11 +50,20 @@ export function DataTable<TData, TValue>({ columns, data }: DataTableProps<TData
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                {row.getVisibleCells().map((cell, cellIndex) => {
+                  if (cellIndex == 0 && row.original.rowspan === 0) {
+                    return null
+                  }
+
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      rowSpan={cellIndex === 0 ? row.original.rowspan || 1 : 1}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  )
+                })}
               </TableRow>
             ))
           ) : (
