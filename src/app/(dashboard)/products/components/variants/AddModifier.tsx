@@ -10,6 +10,8 @@ import { validateZodSchema } from "blitz"
 import { Formik } from "formik"
 import { PlusIcon, XIcon } from "lucide-react"
 import LabeledTextFieldWithSubmit from "@/src/app/components/LabeledTextFieldWithSubmit"
+import getProductVariants from "../../queries/getProductVariants"
+import getProductVariantsWithStocksAndValues from "../../queries/getProductVariantsWithStocksAndValues"
 
 const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
   const [showForm, setShowForm] = React.useState(false)
@@ -27,6 +29,8 @@ const AddModifier: React.FC<{ productId: number }> = ({ productId }) => {
             try {
               await createProductModifierType(values)
               invalidateQuery(getProductModifierTypes)
+              invalidateQuery(getProductVariants)
+              invalidateQuery(getProductVariantsWithStocksAndValues)
               setShowForm(false)
             } catch (error: any) {
               console.error(error)

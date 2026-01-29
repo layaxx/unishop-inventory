@@ -89,6 +89,33 @@ describe("deleteProductModifierValue mutation", () => {
   })
 
   it("does not remove product modifier value when it has stock levels", async () => {
+    const secondValue = await db.productModifierValue.create({
+      data: {
+        value: "M",
+        modifierType: {
+          connect: { id: typeId },
+        },
+      },
+    })
+    const variant2 = await db.productVariant.create({
+      data: {
+        product: {
+          connect: { id: productId },
+        },
+        modifierValues: {
+          connect: [{ id: secondValue.id }],
+        },
+        stockLevels: {
+          create: {
+            quantity: 0,
+            location: {
+              connect: { id: await db.location.findFirstOrThrow().then((loc) => loc.id) },
+            },
+          },
+        },
+      },
+    })
+
     await db.stockLevel.create({
       data: {
         quantity: 10,

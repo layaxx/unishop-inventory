@@ -21,13 +21,13 @@ export default resolver.pipe(
       select: { quantity: true },
     })
 
-    const hasNonZeroStock = stockLevels.some((sl) => sl.quantity > 0)
-
-    if (hasNonZeroStock) {
-      throw new Error("Cannot delete modifier value with existing stock levels")
-    }
-
     if (existing.modifierType.values.length > 1) {
+      const hasNonZeroStock = stockLevels.some((sl) => sl.quantity > 0)
+
+      if (hasNonZeroStock) {
+        throw new Error("Cannot delete modifier value with existing stock levels")
+      }
+
       return await db.$transaction(async (tx) => {
         await tx.stockLevel.deleteMany({
           where: { variant: { modifierValues: { some: { id } } } },

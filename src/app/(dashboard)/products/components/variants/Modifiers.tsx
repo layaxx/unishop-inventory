@@ -27,6 +27,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { MenuIcon, TrashIcon } from "lucide-react"
+import getProductVariants from "../../queries/getProductVariants"
+import getProductVariantsWithStocksAndValues from "../../queries/getProductVariantsWithStocksAndValues"
 
 type Props = {
   productId: number
@@ -50,6 +52,8 @@ const Modifiers: FC<Props> = ({ productId }) => {
 
       await deleteProductModifierType({ id })
       invalidateQuery(getProductModifierTypes)
+      invalidateQuery(getProductVariants)
+      invalidateQuery(getProductVariantsWithStocksAndValues)
     } catch (error) {
       console.error("Failed to delete modifier type:", error)
     }
@@ -63,6 +67,8 @@ const Modifiers: FC<Props> = ({ productId }) => {
 
       await deleteProductModifierValue({ id })
       invalidateQuery(getProductModifierTypes)
+      invalidateQuery(getProductVariants)
+      invalidateQuery(getProductVariantsWithStocksAndValues)
     } catch (error) {
       console.error("Failed to delete modifier value:", error)
     }
