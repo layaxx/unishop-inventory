@@ -36,14 +36,19 @@ const NavUser = dynamic(() => import("./NavUser").then((mod) => mod.NavUser), {
   },
 })
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+type AppSidebarProps = React.ComponentProps<typeof Sidebar> & {
+  initialProducts: { id: number; name: string }[]
+  initialLocations: { id: number; name: string }[]
+}
+
+export function AppSidebar({ initialProducts, initialLocations, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TopNav />
       </SidebarHeader>
       <SidebarContent>
-        <ProdLocNav />
+        <ProdLocNav initialProducts={initialProducts} initialLocations={initialLocations} />
         <NavMovements />
         <NavProjects />
         <NavReports />

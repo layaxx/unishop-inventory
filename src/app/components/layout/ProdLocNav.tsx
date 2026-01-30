@@ -7,9 +7,22 @@ import { NavMain } from "./NavMain"
 import getProductsSimple from "../../(dashboard)/products/queries/getProductsSimple"
 import { Route } from "next"
 
-export default function ProdLocNav() {
-  const [products] = useQuery(getProductsSimple, { select: { id: true, name: true } })
-  const [locations] = useQuery(getLocations, { take: 10 })
+type Props = {
+  initialProducts: { id: number; name: string }[]
+  initialLocations: { id: number; name: string }[]
+}
+
+export default function ProdLocNav({ initialProducts, initialLocations }: Props) {
+  const [products] = useQuery(
+    getProductsSimple,
+    { select: { id: true, name: true } },
+    { initialData: initialProducts }
+  )
+  const [locations] = useQuery(
+    getLocations,
+    { take: 10 },
+    { initialData: { locations: initialLocations } }
+  )
   return (
     <NavMain
       items={[

@@ -4,10 +4,15 @@ import { ErrorBoundary } from "@blitzjs/next"
 import { FC, PropsWithChildren } from "react"
 import Error from "../../error"
 
-const SidebarLayout: FC<PropsWithChildren> = ({ children }) => {
+type Props = PropsWithChildren<{
+  initialProducts: { id: number; name: string }[]
+  initialLocations: { id: number; name: string }[]
+}>
+
+const SidebarLayout: FC<Props> = ({ children, initialProducts, initialLocations }) => {
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar initialProducts={initialProducts} initialLocations={initialLocations} />
       <SidebarInset>
         <ErrorBoundary FallbackComponent={Error}>{children}</ErrorBoundary>
       </SidebarInset>
