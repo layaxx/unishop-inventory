@@ -7,6 +7,9 @@ import getProduct from "../queries/getProduct"
 import Modifiers from "../components/variants/Modifiers"
 import VariantOverview from "../components/variants/VariantOverview"
 import DeleteLink from "../components/DeleteLink"
+import getProductModifierTypes from "../queries/getProductModifierTypes"
+import getLocations from "../../locations/queries/getLocations"
+import getProductVariantsWithStocksAndValues from "../queries/getProductVariantsWithStocksAndValues"
 
 type ProductPageProps = {
   params: Promise<{ productId: string }>
@@ -36,6 +39,12 @@ export default async function Page(props: ProductPageProps) {
 
   if (!product) notFound()
 
+  const initialTypes = await invoke(getProductModifierTypes, { productId: product.id })
+  const initialVariants = await invoke(getProductVariantsWithStocksAndValues, {
+    where: { productId: product.id },
+  })
+  const initialLocations = await invoke(getLocations, { take: 100 })
+
   return (
     <div>
       <div>
@@ -49,8 +58,13 @@ export default async function Page(props: ProductPageProps) {
         </Link>
         <DeleteLink productId={product.id} />
 
-        <Modifiers productId={product.id} />
-        <VariantOverview productId={product.id} />
+        <Modifiers productId={product.id} initialData={initialTypes} />
+        <VariantOverview
+          productId={product.id}
+          initialTypes={initialTypes}
+          initialVariants={initialVariants}
+          initialLocations={initialLocations}
+        />
       </div>
     </div>
   )

@@ -4,6 +4,8 @@ import { useQuery } from "@blitzjs/rpc"
 import getRecentMovements from "../queries/getRecentMovements"
 import dayjs from "dayjs"
 
+type RecentMovementsData = Awaited<ReturnType<typeof getRecentMovements>>
+
 const formatProductName = (variant: {
   product: { name: string }
   modifierValues: { modifierType: { name: string }; value: string }[]
@@ -14,8 +16,12 @@ const formatProductName = (variant: {
   return `${variant.product.name}${modifierValues ? ` (${modifierValues})` : ""}`
 }
 
-const RecentMovements = () => {
-  const [recentMovements] = useQuery(getRecentMovements, {})
+type Props = {
+  initialData: RecentMovementsData
+}
+
+const RecentMovements = ({ initialData }: Props) => {
+  const [recentMovements] = useQuery(getRecentMovements, {}, { initialData })
 
   return (
     <>

@@ -32,10 +32,11 @@ import getProductVariantsWithStocksAndValues from "../../queries/getProductVaria
 
 type Props = {
   productId: number
+  initialData?: Awaited<ReturnType<typeof getProductModifierTypes>>
 }
 
-const Modifiers: FC<Props> = ({ productId }) => {
-  const [types] = useQuery(getProductModifierTypes, { productId })
+const Modifiers: FC<Props> = ({ productId, initialData }) => {
+  const [types] = useQuery(getProductModifierTypes, { productId }, { initialData })
 
   const [deleteProductModifierValue] = useMutation(deleteProductModifierValueMutation, {
     throwOnError: false,

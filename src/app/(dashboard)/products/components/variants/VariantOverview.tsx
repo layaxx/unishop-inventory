@@ -9,12 +9,28 @@ import React from "react"
 import getProductVariantsWithStocksAndValues from "../../queries/getProductVariantsWithStocksAndValues"
 import { makeVariantSortFunction } from "@/src/lib/variant"
 
-const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
-  const [types] = useQuery(getProductModifierTypes, { productId })
-  const [variants] = useQuery(getProductVariantsWithStocksAndValues, {
-    where: { productId },
-  })
-  const [locations] = useQuery(getLocations, { take: 100 })
+type Props = {
+  productId: number
+  initialTypes?: Awaited<ReturnType<typeof getProductModifierTypes>>
+  initialVariants?: Awaited<ReturnType<typeof getProductVariantsWithStocksAndValues>>
+  initialLocations?: Awaited<ReturnType<typeof getLocations>>
+}
+
+const VariantOverview: FC<Props> = ({
+  productId,
+  initialTypes,
+  initialVariants,
+  initialLocations,
+}) => {
+  const [types] = useQuery(getProductModifierTypes, { productId }, { initialData: initialTypes })
+  const [variants] = useQuery(
+    getProductVariantsWithStocksAndValues,
+    {
+      where: { productId },
+    },
+    { initialData: initialVariants }
+  )
+  const [locations] = useQuery(getLocations, { take: 100 }, { initialData: initialLocations })
 
   const tableData = React.useMemo(() => {
     const temp =
@@ -64,8 +80,6 @@ const VariantOverview: FC<{ productId: number }> = ({ productId }) => {
       return x
     })
   }, [variants, types, locations])
-
-  console.log(tableData)
 
   return (
     <div className="mt-4">
