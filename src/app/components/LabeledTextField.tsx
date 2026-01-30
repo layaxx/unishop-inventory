@@ -2,6 +2,7 @@ import { forwardRef, PropsWithoutRef } from "react"
 import { useField, useFormikContext, ErrorMessage } from "formik"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Field, FieldLabel } from "@/components/ui/field"
 
 export interface LabeledTextFieldProps
   extends PropsWithoutRef<React.JSX.IntrinsicElements["input"]> {
@@ -12,19 +13,27 @@ export interface LabeledTextFieldProps
   /** Field type. Doesn't include radio buttons and checkboxes */
   type?: "text" | "password" | "email" | "number"
   outerProps?: PropsWithoutRef<React.JSX.IntrinsicElements["div"]>
+  skipLabel?: boolean
 }
 
 export const LabeledTextField = forwardRef<HTMLInputElement, LabeledTextFieldProps>(
-  ({ name, label, outerProps, ...props }, ref) => {
+  ({ skipLabel, name, label, outerProps, ...props }, ref) => {
     const [input] = useField(name)
     const { isSubmitting } = useFormikContext()
 
     return (
       <div {...outerProps}>
-        <Label>
-          {label}
-          <Input {...input} disabled={isSubmitting} {...props} ref={ref} />
-        </Label>
+        <Field>
+          {!skipLabel && <FieldLabel htmlFor={`input-field-${name}`}>{label}</FieldLabel>}
+
+          <Input
+            id={`input-field-${name}`}
+            {...input}
+            disabled={isSubmitting}
+            {...props}
+            ref={ref}
+          />
+        </Field>
 
         <ErrorMessage name={name}>
           {(msg) => (

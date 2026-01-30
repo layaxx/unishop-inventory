@@ -39,11 +39,13 @@ export default async function Page(props: ProductPageProps) {
 
   if (!product) notFound()
 
-  const initialTypes = await invoke(getProductModifierTypes, { productId: product.id })
-  const initialVariants = await invoke(getProductVariantsWithStocksAndValues, {
-    where: { productId: product.id },
-  })
-  const initialLocations = await invoke(getLocations, { take: 100 })
+  const [initialTypes, initialVariants, initialLocations] = await Promise.all([
+    invoke(getProductModifierTypes, { productId: product.id }),
+    invoke(getProductVariantsWithStocksAndValues, {
+      where: { productId: product.id },
+    }),
+    invoke(getLocations, { take: 100 }),
+  ])
 
   return (
     <div>

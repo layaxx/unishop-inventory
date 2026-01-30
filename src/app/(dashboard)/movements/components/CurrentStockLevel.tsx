@@ -12,11 +12,7 @@ const CurrentStockLevel: FC<{ locationId: number; variantId: number }> = ({
     { enabled: locationId !== -1 && variantId !== -1 }
   )
 
-  if (locationId === -1 || variantId === -1) {
-    return <p>?</p>
-  }
-
-  return <p>Currently on Stock: {stockLevel?.quantity}</p>
+  return <p>current stock: {stockLevel?.quantity ?? "n/A"}</p>
 }
 
 export default CurrentStockLevel

@@ -4,8 +4,13 @@ import { useQuery } from "@blitzjs/rpc"
 import Link from "next/link"
 import getProducts from "../queries/getProducts"
 import { DataTable } from "@/src/app/components/DataTable"
+import { FC } from "react"
 
-const ITEMS_PER_PAGE = 100
+type Props = {
+  initialData?: Awaited<ReturnType<typeof getProducts>>
+}
+
+export const PRODUCTS_PER_PAGE = 100
 
 function getStockCount(product: any) {
   return product.variants.reduce((acc: number, variant: any) => {
@@ -17,11 +22,15 @@ function getStockCount(product: any) {
   }, 0)
 }
 
-export const ProductsList = () => {
-  const [res] = useQuery(getProducts, {
-    orderBy: { id: "asc" },
-    take: ITEMS_PER_PAGE,
-  })
+export const ProductsList: FC<Props> = ({ initialData }) => {
+  const [res] = useQuery(
+    getProducts,
+    {
+      orderBy: { id: "asc" },
+      take: PRODUCTS_PER_PAGE,
+    },
+    { initialData }
+  )
 
   const { products } = res ?? { products: [] }
 

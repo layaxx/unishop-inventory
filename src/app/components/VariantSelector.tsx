@@ -12,7 +12,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { useQuery } from "@blitzjs/rpc"
-import { ErrorMessage, useField, useFormikContext } from "formik"
+import { ErrorMessage, useField } from "formik"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { FC, useState } from "react"
 import { getName } from "@/src/lib/variant"
@@ -20,7 +20,6 @@ import getProductVariants from "../(dashboard)/products/queries/getProductVarian
 
 const VariantSelector: FC<{ name: string; label: string }> = ({ name }) => {
   const [input] = useField(name)
-  const {} = useFormikContext()
 
   const [variantsResult] = useQuery(getProductVariants, {
     include: {

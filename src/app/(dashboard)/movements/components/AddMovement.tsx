@@ -12,6 +12,8 @@ import { invalidateQuery, useMutation } from "@blitzjs/rpc"
 import addMovementMutation from "../mutations/addMovement"
 import CurrentStockLevel from "./CurrentStockLevel"
 import getRecentMovements from "../queries/getRecentMovements"
+import { XIcon } from "lucide-react"
+import { FieldLabel } from "@/components/ui/field"
 
 const AddMovement = () => {
   const [formError, setFormError] = useState<string | null>(null)
@@ -20,11 +22,15 @@ const AddMovement = () => {
   return (
     <>
       <Formik
-        initialValues={{ reason: "", from: -1, to: -1, variants: [{ id: -1, quantity: 0 }] }}
+        initialValues={{ reason: "", from: -1, to: -1, variants: [{ id: -1, quantity: 1 }] }}
         validate={validateZodSchema(MovementSchema)}
         onSubmit={async (values, formik) => {
           if (values.from === values.to) {
             setFormError("From and To locations cannot be the same.")
+            return
+          }
+          if (values.variants.length === 0) {
+            setFormError("Please add at least one product variant to move.")
             return
           }
 
@@ -52,12 +58,12 @@ const AddMovement = () => {
             )}
 
             <div className="flex gap-4 mb-4">
-              <div>
-                <p>From</p>
+              <div className="flex flex-col gap-4">
+                <FieldLabel>From</FieldLabel>
                 <LocationSelector label="from" name="from" />
               </div>
-              <div>
-                <p>To</p>
+              <div className="flex flex-col gap-4">
+                <FieldLabel>To</FieldLabel>
                 <LocationSelector label="to" name="to" />
               </div>
             </div>
@@ -70,54 +76,50 @@ const AddMovement = () => {
               name="variants"
               render={(arrayHelpers) => (
                 <div>
-                  {values.variants && values.variants.length > 0 ? (
-                    values.variants.map((_variant, index) => (
-                      <div key={index}>
-                        <div className="flex gap-4 mb-4">
-                          <div>
-                            <VariantSelector label="variant" name={`variants.${index}.id`} />
-                          </div>
-                          <LabeledTextField
-                            label="quantity"
-                            name={`variants.${index}.quantity`}
-                            type="number"
-                          />
-                          <div>
-                            <Button
-                              type="button"
-                              onClick={() => arrayHelpers.remove(index)}
-                              variant="ghost"
-                            >
-                              -
-                            </Button>
-
-                            <Button
-                              type="button"
-                              onClick={() => arrayHelpers.insert(index, { id: -1, quantity: 0 })}
-                              variant="ghost"
-                            >
-                              +
-                            </Button>
-                          </div>
-                          <CurrentStockLevel
-                            variantId={values.variants[index].id}
-                            locationId={values.from}
-                          />
+                  {values.variants.map((_variant, index) => (
+                    <div key={index}>
+                      <div className="flex gap-2 mb-4 items-center">
+                        <FieldLabel className="w-6">{index + 1}.</FieldLabel>
+                        <div>
+                          <VariantSelector label="variant" name={`variants.${index}.id`} />
                         </div>
+                        <LabeledTextField
+                          label="quantity"
+                          name={`variants.${index}.quantity`}
+                          type="number"
+                          outerProps={{ className: "w-24" }}
+                          skipLabel
+                        />
+                        <Button
+                          type="button"
+                          onClick={() => arrayHelpers.remove(index)}
+                          variant="ghost"
+                          size="icon"
+                          title="Remove Entry"
+                        >
+                          <XIcon />
+                        </Button>
+                        <CurrentStockLevel
+                          variantId={values.variants[index].id}
+                          locationId={values.from}
+                        />
                       </div>
-                    ))
-                  ) : (
-                    <Button type="button" onClick={() => arrayHelpers.push("")}>
-                      Add a Product variant
-                    </Button>
-                  )}
+                    </div>
+                  ))}
 
-                  <div className="mt-4">
-                    <Button type="submit">Log Movement</Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => arrayHelpers.push({ id: -1, quantity: 1 })}
+                  >
+                    Add Entry
+                  </Button>
                 </div>
               )}
             />
+            <div className="mt-4">
+              <Button type="submit">Log Movement</Button>
+            </div>
           </Form>
         )}
       </Formik>
