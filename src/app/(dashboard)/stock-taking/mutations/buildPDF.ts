@@ -10,13 +10,18 @@ import dayjs from "dayjs"
 import { latexTemplate } from "@/lib/pdf/template"
 import { buildCompactTable } from "@/lib/pdf/tables/compact"
 import { buildTables } from "@/lib/pdf/tables/main-tables"
+import {
+  TableInputLocations,
+  TableInputStockData,
+  TableInputStockLevels,
+} from "@/lib/pdf/tables/types"
 
 const execAsync = promisify(exec)
 
 const BuildPDFSchema = z.object({
-  locationIds: z.array(z.number().min(1)).min(1),
+  auditIds: z.array(z.number().min(1)).min(1).optional(),
   includeCompact: z.boolean().optional(),
-  directFromStockTaking: z.boolean().optional(),
+  directFromStockTaking: z.boolean().default(true),
 })
 
 const formatTemplateForStocktaking = (template: string): string => {
@@ -55,6 +60,10 @@ Trotz größter Sorgfalt können Abweichungen nicht vollständig ausgeschlossen 
 }
 
 export default resolver.pipe(resolver.zod(BuildPDFSchema), resolver.authorize(), async (data) => {
+  if ((!data.auditIds || data.auditIds.length === 0) && data.directFromStockTaking) {
+    throw new Error("Either auditIds or directFromStockTaking must be provided")
+  }
+
   let template = latexTemplate
 
   if (data.directFromStockTaking) {
@@ -82,34 +91,78 @@ export default resolver.pipe(resolver.zod(BuildPDFSchema), resolver.authorize(),
     template = formatTemplateCurrent(template, audits)
   }
 
-  const allLocations = await db.location.findMany({ where: { id: { in: data.locationIds } } })
+  let relevantLocations: TableInputLocations = []
+  let stockLevels: TableInputStockLevels = []
+  let stockData: TableInputStockData = []
+  if (data.directFromStockTaking) {
+    const audits = await db.auditLogStocktaking.findMany({
+      where: { id: { in: data.auditIds } },
+    })
 
-  const stockData = await db.stockLevel.findMany({
-    where: { locationId: data.locationIds[0] },
-    include: {
-      variant: {
-        include: {
-          product: { select: { name: true } },
-          modifierValues: {
-            include: { modifierType: { select: { name: true } } },
+    relevantLocations = await db.location.findMany({
+      where: { id: { in: audits.map((a) => a.locationId) } },
+    })
+
+    if (relevantLocations.length === 0) {
+      throw new Error("No locations found for the provided audit IDs")
+    } else if (relevantLocations.length !== data.auditIds!.length) {
+      throw new Error("Some audits do not have a corresponding location")
+    }
+
+    stockData = await db.stockLevel.findMany({
+      where: { locationId: relevantLocations[0].id },
+      include: {
+        variant: {
+          include: {
+            product: { select: { name: true } },
+            modifierValues: {
+              include: { modifierType: { select: { name: true } } },
+            },
           },
         },
       },
-    },
-  })
+    })
 
-  const stockLevels = await db.stockLevel.findMany({
-    where: { locationId: { in: data.locationIds } },
-  })
+    stockLevels = (
+      await db.stocktakingCount.findMany({
+        where: { auditLogStocktakingId: { in: data.auditIds } },
+        include: { auditLogStocktaking: true },
+      })
+    ).map((entry) => ({
+      variantId: entry.variantId,
+      locationId: entry.auditLogStocktaking.locationId,
+      quantity: entry.quantityCounted,
+    }))
+  } else {
+    relevantLocations = await db.location.findMany()
+
+    stockData = await db.stockLevel.findMany({
+      where: { locationId: relevantLocations[0].id },
+      include: {
+        variant: {
+          include: {
+            product: { select: { name: true } },
+            modifierValues: {
+              include: { modifierType: { select: { name: true } } },
+            },
+          },
+        },
+      },
+    })
+
+    stockLevels = await db.stockLevel.findMany({
+      where: { locationId: { in: relevantLocations.map((loc) => loc.id) } },
+    })
+  }
 
   template = template.replace(
     "###COMPACT-TABLE###",
-    data.includeCompact ? await buildCompactTable(allLocations, stockLevels, stockData) : "%\n"
+    data.includeCompact ? await buildCompactTable(relevantLocations, stockLevels, stockData) : "%\n"
   )
 
   template = template.replace(
     "###TABLE###",
-    await buildTables(allLocations, stockLevels, stockData)
+    await buildTables(relevantLocations, stockLevels, stockData)
   )
 
   // render latex to pdf

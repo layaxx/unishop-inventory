@@ -9,13 +9,9 @@ export const { GET } = withBlitzAuth({
     if (!ctx.session.$isAuthorized()) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
-    const allLocations = (await db.location.findMany()).map((loc) => loc.id)
     let report
     try {
-      report = await buildPDF(
-        { locationIds: allLocations, includeCompact: true, directFromStockTaking: false },
-        ctx
-      )
+      report = await buildPDF({ directFromStockTaking: false }, ctx)
     } catch (e) {
       console.log("Error generating PDF report:", e)
       return new NextResponse("Failed to generate report", { status: 500 })

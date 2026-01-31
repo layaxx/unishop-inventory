@@ -5,8 +5,6 @@ import buildPDF from "./buildPDF"
 export default resolver.pipe(resolver.authorize(), async (_data, ctx) => {
   const allLocations = (await db.location.findMany()).map((loc) => loc.id)
 
-  const report = await buildPDF({ locationIds: allLocations }, ctx)
-
   const audits = await Promise.all(
     allLocations.map(async (locId) => {
       const latestAudit = await db.auditLogStocktaking.findFirst({
@@ -20,6 +18,8 @@ export default resolver.pipe(resolver.authorize(), async (_data, ctx) => {
   if (audits.some((a) => !a)) {
     throw new Error("No successful stocktaking audits found for all locations")
   }
+
+  const report = await buildPDF({ auditIds: audits.map((a) => a!.id) }, ctx)
 
   await db.pDF.create({
     data: {

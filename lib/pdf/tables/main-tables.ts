@@ -1,17 +1,10 @@
-import { Location, StockLevel } from "@/db"
 import { buildProductTable } from "@/lib/pdf/productTable"
+import { TableInputLocations, TableInputStockData, TableInputStockLevels } from "./types"
 
 export const buildTables = async (
-  locations: Location[],
-  stockLevels: Pick<StockLevel, "variantId" | "locationId" | "quantity">[],
-  stockData: Array<{
-    quantity: number
-    variantId: number
-    variant: {
-      product: { name: string }
-      modifierValues: { modifierType: { name: string }; value: string }[]
-    }
-  }>
+  locations: TableInputLocations,
+  stockLevels: TableInputStockLevels,
+  stockData: TableInputStockData
 ) => {
   if (stockData.length === 0) {
     return "% No stock data available\n"
@@ -47,7 +40,7 @@ export const buildTables = async (
               const stockEntry = stockLevels.find(
                 (s) => s.variantId === variant.variantId && s.locationId === loc.id
               )
-              return [locationNames[loc.id], stockEntry ? stockEntry.quantity : -99]
+              return [locationNames[loc.id], stockEntry ? stockEntry.quantity : -99] // FIXME: this is maybe not correct atm?
             })
           ),
         }

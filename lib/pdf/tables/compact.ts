@@ -1,17 +1,10 @@
 import { buildCompactProductsTable } from "@/lib/pdf/compactTable"
-import { Location, StockLevel } from "@/db"
+import { TableInputLocations, TableInputStockData, TableInputStockLevels } from "./types"
 
 export const buildCompactTable = async (
-  locations: Location[],
-  stockLevels: Pick<StockLevel, "variantId" | "locationId" | "quantity">[],
-  stockData: Array<{
-    quantity: number
-    variantId: number
-    variant: {
-      product: { name: string }
-      modifierValues: { modifierType: { name: string }; value: string }[]
-    }
-  }>
+  locations: TableInputLocations,
+  stockLevels: TableInputStockLevels,
+  stockData: TableInputStockData
 ) => {
   if (stockData.length === 0) {
     return "% No stock data available\n"
