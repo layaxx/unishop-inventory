@@ -16,11 +16,27 @@ import getLastStocktakingProcesses from "../queries/getLastStocktakingProcesses"
 import dayjs from "dayjs"
 import CombinedPDF from "./CombinedPDF"
 import PastReports from "../../reports/components/PastReports"
+import { Await } from "blitz"
+import { FC } from "react"
 
-const StocktakingOverview = () => {
-  const [inventoryEntries] = useQuery(getInventoryEntries, {})
-  const [locations] = useQuery(getLocations, {})
-  const [audits] = useQuery(getLastStocktakingProcesses, {})
+type Props = {
+  inventoryEntriesInitialData?: Await<ReturnType<typeof getInventoryEntries>>
+  locationsInitialData?: Await<ReturnType<typeof getLocations>>
+  auditsInitialData?: Await<ReturnType<typeof getLastStocktakingProcesses>>
+}
+
+const StocktakingOverview: FC<Props> = ({
+  inventoryEntriesInitialData,
+  locationsInitialData,
+  auditsInitialData,
+}) => {
+  const [inventoryEntries] = useQuery(
+    getInventoryEntries,
+    {},
+    { initialData: inventoryEntriesInitialData }
+  )
+  const [locations] = useQuery(getLocations, {}, { initialData: locationsInitialData })
+  const [audits] = useQuery(getLastStocktakingProcesses, {}, { initialData: auditsInitialData })
 
   return (
     <>

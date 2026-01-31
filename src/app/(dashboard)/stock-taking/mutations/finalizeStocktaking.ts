@@ -2,6 +2,8 @@ import { resolver } from "@blitzjs/rpc"
 import db, { MovementType } from "db"
 import { FinalizeStocktakingInput } from "../schemas"
 import buildPDF from "./buildPDF"
+import { create } from "node:domain"
+import { connect } from "node:http2"
 
 export default resolver.pipe(
   resolver.zod(FinalizeStocktakingInput),
@@ -30,6 +32,13 @@ export default resolver.pipe(
       )
     }
 
+    const movements: Array<{
+      variantId: number
+      toId?: number
+      fromId?: number
+      quantity: number
+      type: MovementType
+    }> = []
     // update stockLevels for all tracked variants
     const auditId = await db.$transaction(async (tx) => {
       const groups = await tx.inventoryEntry.groupBy({
@@ -53,22 +62,18 @@ export default resolver.pipe(
           const diff = group._sum.quantity - previousStockLevel.quantity
           if (diff !== 0) {
             if (diff > 0) {
-              await tx.movement.create({
-                data: {
-                  variantId: group.variantId,
-                  toId: locationId,
-                  quantity: diff,
-                  type: MovementType.ADJUSTMENT,
-                },
+              movements.push({
+                variantId: group.variantId,
+                toId: locationId,
+                quantity: diff,
+                type: MovementType.ADJUSTMENT,
               })
             } else {
-              await tx.movement.create({
-                data: {
-                  variantId: group.variantId,
-                  fromId: locationId,
-                  quantity: Math.abs(diff),
-                  type: MovementType.ADJUSTMENT,
-                },
+              movements.push({
+                variantId: group.variantId,
+                fromId: locationId,
+                quantity: Math.abs(diff),
+                type: MovementType.ADJUSTMENT,
               })
             }
           }
@@ -91,15 +96,28 @@ export default resolver.pipe(
 
       // remove all inventoryEvents for the location
       await tx.inventoryEntry.deleteMany({ where: { locationId } })
-      return (
-        await tx.auditLogStocktaking.create({
-          data: {
-            locationId,
-            userId: ctx.session.userId,
-            success: true,
-          },
-        })
-      ).id
+      const batch = await db.movementBatch.create({
+        data: { reason: "Stocktaking Adjustment", movements: { createMany: { data: movements } } },
+      })
+
+      const auditLog = await tx.auditLogStocktaking.create({
+        data: {
+          locationId,
+          userId: ctx.session.userId,
+          success: true,
+          movementBatchId: batch.id,
+        },
+      })
+
+      await tx.stocktakingCount.createMany({
+        data: groups.map((group) => ({
+          auditLogStocktakingId: auditLog.id,
+          variantId: group.variantId,
+          quantityCounted: group._sum.quantity!,
+        })),
+      })
+
+      return auditLog.id
     })
 
     try {

@@ -127,10 +127,11 @@ model ProductVariant {
   updatedAt DateTime @updatedAt
 
   // Relations
-  stockLevels    StockLevel[]
-  movements      Movement[]
-  modifierValues ProductModifierValue[]
-  InventoryEntry InventoryEntry[]
+  stockLevels       StockLevel[]
+  movements         Movement[]
+  modifierValues    ProductModifierValue[]
+  InventoryEntry    InventoryEntry[]
+  StocktakingResult StocktakingCount[]
 }
 
 model Movement {
@@ -160,7 +161,8 @@ model MovementBatch {
 
   reason String
 
-  movements Movement[]
+  movements           Movement[]
+  AuditLogStocktaking AuditLogStocktaking[]
 }
 
 model StockLevel {
@@ -195,15 +197,28 @@ model InventoryEntry {
 }
 
 model AuditLogStocktaking {
-  id         Int      @id @default(autoincrement())
-  locationId Int
-  user       User     @relation(fields: [userId], references: [id])
-  userId     Int
-  success    Boolean
-  pdfReport  Bytes?
-  createdAt  DateTime @default(now())
-  PDF        PDF?     @relation(fields: [pDFId], references: [id])
-  pDFId      Int?
+  id              Int            @id @default(autoincrement())
+  locationId      Int
+  user            User           @relation(fields: [userId], references: [id])
+  userId          Int
+  success         Boolean
+  pdfReport       Bytes?
+  createdAt       DateTime       @default(now())
+  adjustments     MovementBatch? @relation(fields: [movementBatchId], references: [id])
+  PDF             PDF?           @relation(fields: [pDFId], references: [id])
+  pDFId           Int?
+  movementBatchId Int?
+
+  counts StocktakingCount[]
+}
+
+model StocktakingCount {
+  id                    Int                 @id @default(autoincrement())
+  auditLogStocktaking   AuditLogStocktaking @relation(fields: [auditLogStocktakingId], references: [id])
+  auditLogStocktakingId Int
+  variant               ProductVariant      @relation(fields: [variantId], references: [id])
+  variantId             Int
+  quantityCounted       Int
 }
 
 model PDF {

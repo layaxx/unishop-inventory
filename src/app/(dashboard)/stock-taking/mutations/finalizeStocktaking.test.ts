@@ -318,6 +318,8 @@ describe("finalizeStocktaking mutation", () => {
     expect(movementForVariant2?.fromId).toBeNull()
     expect(movementForVariant2?.toId).toBe(ids.locationId)
     expect(movementForVariant2?.quantity).toBe(35) // 0 -> 35
+
+    expect(movementForVariant1!.movementBatchId).toBe(movementForVariant2!.movementBatchId)
   })
 
   it("creates stock levels if necessary", async () => {
@@ -354,5 +356,59 @@ describe("finalizeStocktaking mutation", () => {
 
     expect(stockForVariant2).toBeDefined()
     expect(stockForVariant2?.quantity).toBe(34)
+  })
+
+  it("saves stock levels for this stocktaking process", async () => {
+    expect(ids.variantIds.length).toBe(2)
+
+    await db.stockLevel.update({
+      where: { locationId_variantId: { locationId: ids.locationId, variantId: ids.variantIds[0] } },
+      data: { quantity: 50 },
+    })
+
+    await db.inventoryEntry.createMany({
+      data: [
+        // first variant
+        {
+          locationId: ids.locationId,
+          variantId: ids.variantIds[0],
+          quantity: 17,
+        },
+        {
+          locationId: ids.locationId,
+          variantId: ids.variantIds[0],
+          quantity: 0,
+        },
+        {
+          locationId: ids.locationId,
+          variantId: ids.variantIds[0],
+          quantity: 5,
+        },
+        // second variant
+        {
+          locationId: ids.locationId,
+          variantId: ids.variantIds[1],
+          quantity: 35,
+        },
+      ],
+    })
+
+    await finalizeStocktaking({ locationId: ids.locationId }, mockCtx)
+
+    const auditCounts = await db.auditLogStocktaking.findMany({
+      where: { locationId: ids.locationId },
+      include: { counts: true },
+    })
+
+    expect(auditCounts.length).toBe(1)
+    expect(auditCounts[0].counts.length).toBe(2)
+
+    const countForVariant1 = auditCounts[0].counts.find((c) => c.variantId === ids.variantIds[0])
+    const countForVariant2 = auditCounts[0].counts.find((c) => c.variantId === ids.variantIds[1])
+    expect(countForVariant1).toBeDefined()
+    expect(countForVariant1?.quantityCounted).toBe(22)
+
+    expect(countForVariant2).toBeDefined()
+    expect(countForVariant2?.quantityCounted).toBe(35)
   })
 })

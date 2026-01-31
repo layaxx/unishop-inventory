@@ -12,16 +12,32 @@ import { Button } from "@/components/ui/button"
 import { ErrorBoundary } from "@blitzjs/next"
 import { DataTable } from "@/src/app/components/DataTable"
 
-const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId }) => {
-  const [inventoryEntries] = useQuery(getInventoryEntries, { where: { locationId } })
-  const [location] = useQuery(getLocation, { id: locationId })
+type Props = {
+  locationInitialData: Awaited<ReturnType<typeof getLocation>>
+  inventoryEntriesInitialData?: Awaited<ReturnType<typeof getInventoryEntries>>
+}
+
+const StocktakingLocationOverview: FC<Props> = ({
+  locationInitialData,
+  inventoryEntriesInitialData,
+}) => {
+  const [inventoryEntries] = useQuery(
+    getInventoryEntries,
+    { where: { locationId: locationInitialData.id } },
+    { initialData: inventoryEntriesInitialData }
+  )
+  const [location] = useQuery(
+    getLocation,
+    { id: locationInitialData.id },
+    { initialData: locationInitialData }
+  )
 
   const formRef = useRef(null)
 
   return (
     <div>
       <h1 className="text-5xl font-bold mb-4">Stocktaking for {location?.name}</h1>
-      <NewStocktakingEntry locationId={locationId} innerRef={formRef} />
+      <NewStocktakingEntry locationId={locationInitialData.id} innerRef={formRef} />
       <div className="flex flex-wrap gap-4 mt-4">
         <div className="w-full md:w-6/12">
           <h2 className="mb-2 font-bold text-4xl">Tracked variants</h2>
@@ -43,7 +59,7 @@ const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId })
           />
         </div>
         <div className="w-full md:w-3/12">
-          <UntrackedVariants locationId={locationId} formRef={formRef} />
+          <UntrackedVariants locationId={locationInitialData.id} formRef={formRef} />
         </div>
       </div>
 
@@ -57,7 +73,7 @@ const StocktakingLocationOverview: FC<{ locationId: number }> = ({ locationId })
           )
         }}
       >
-        <FinalizeStocktaking locationId={locationId} />
+        <FinalizeStocktaking locationId={locationInitialData.id} />
       </ErrorBoundary>
     </div>
   )

@@ -2,6 +2,7 @@ import db from "@/db"
 
 export const dbReset = async () => {
   await db.$transaction([
+    db.stocktakingCount.deleteMany({}),
     db.auditLogStocktaking.deleteMany({}),
     db.inventoryEntry.deleteMany({}),
     db.movement.deleteMany({}),
