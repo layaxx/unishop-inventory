@@ -7,7 +7,7 @@ import getLocations from "../../../locations/queries/getLocations"
 import getProductModifierTypes from "../../queries/getProductModifierTypes"
 import React from "react"
 import getProductVariantsWithStocksAndValues from "../../queries/getProductVariantsWithStocksAndValues"
-import { makeVariantSortFunction } from "@/src/lib/variant"
+import { makeVariantSortFunction } from "@/lib/variant"
 
 type Props = {
   productId: number

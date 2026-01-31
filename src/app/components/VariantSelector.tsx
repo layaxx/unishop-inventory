@@ -15,7 +15,7 @@ import { useQuery } from "@blitzjs/rpc"
 import { ErrorMessage, useField } from "formik"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { FC, useState } from "react"
-import { getName } from "@/src/lib/variant"
+import { getName } from "@/lib/variant"
 import getProductVariants from "../(dashboard)/products/queries/getProductVariants"
 
 const VariantSelector: FC<{ name: string; label: string }> = ({ name }) => {

@@ -1,7 +1,7 @@
 import { useQuery } from "@blitzjs/rpc"
 import { FC, RefObject } from "react"
 import getUntrackedVariants from "../queries/getUntrackedVariants"
-import { getName } from "@/src/lib/variant"
+import { getName } from "@/lib/variant"
 import { Button } from "@/components/ui/button"
 import { DataTable } from "@/src/app/components/DataTable"
 

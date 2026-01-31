@@ -1,88 +1,17 @@
 import { resolver } from "@blitzjs/rpc"
-import { late, z } from "zod"
+import { z } from "zod"
 import fs from "node:fs/promises"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
 import { exec } from "node:child_process"
 import db from "@/db"
 import { promisify } from "node:util"
-import { buildProductTable } from "@/lib/pdf/productTable"
-import { buildCompactProductsTable } from "@/lib/pdf/compactTable"
 import dayjs from "dayjs"
+import { latexTemplate } from "@/lib/pdf/template"
+import { buildCompactTable } from "@/lib/pdf/tables/compact"
+import { buildTables } from "@/lib/pdf/tables/main-tables"
 
 const execAsync = promisify(exec)
-
-const template = `\\documentclass[a4paper,10 pt]{article} % Uses article class in A4 format
-\\setlength{\\voffset}{-15pt}
-
-\\usepackage[a4paper, margin=2.5cm]{geometry} % Sets margin to 2.5cm for A4 Paper
-\\usepackage[onehalfspacing]{setspace} % Sets Spacing to 1.5
-\\usepackage{parskip}
-\\usepackage[T1]{fontenc} % Use European encoding
-\\usepackage[utf8]{inputenc} % Use UTF-8 encoding
-\\usepackage{charter} % Use the Charter font
-\\usepackage{microtype} % Slightly tweak font spacing for aesthetics
-\\usepackage{lastpage}
-\\usepackage{multirow}
-\\usepackage{tabularx}
-\\usepackage{longtable}
-\\usepackage{needspace}
-\\usepackage{ltablex}
-\\keepXColumns
-
-\\usepackage[english, ngerman]{babel} % Language hyphenation and typographical rules
-
-\\usepackage[ddmmyyyy]{datetime} 
-\\renewcommand{\\dateseparator}{.}
-\\usepackage{xcolor} % Driver-independent color extensions
-\\usepackage{booktabs} % Enhances quality of tables
-\\usepackage{enumitem}
-\\setlist{nosep} % or \\setlist{noitemsep} to leave space around whole list
-\\usepackage{fancyhdr} % Headers and footers
-\\pagestyle{fancy} % All pages have headers and footers
-\\fancyhead{}\\renewcommand{\\headrulewidth}{0pt} % Blank out the default header
-\\fancyfoot[L]{\\textsc{Inventur UniShop Bamberg, \\today}} % Custom footer text
-\\fancyfoot[C]{} % Custom footer text
-\\fancyfoot[R]{\\thepage/\\pageref{LastPage}} % Custom footer text
-
-%----------------------------------------------------------------------------------------
-\\providecommand{\\tightlist}{%
-  \\setlength{\\itemsep}{0pt}\\setlength{\\parskip}{0pt}}
-
-\\begin{document}
-\\title{template_assignment} % Article title
-\\fancyhead[C]{}
-\\begin{minipage}{0.195\\textwidth} % Left side of title section
-  \\raggedright
-  %\\hfill
-  \\textbf{}
-  \\footnotesize % Authors text size
-  \\medskip\\hrule
-\\end{minipage}
-\\begin{minipage}{0.6\\textwidth} % Center of title section
-  \\centering
-  \\huge % Title text size
-  ###TITLE###\\\\
-  \\normalsize % Subtitle text size
-  UniShop Bamberg\\\\ % Assignment subtitle
-\\end{minipage}
-\\begin{minipage}{0.195\\textwidth} % Right side of title section
-  \\raggedleft
-  \\textbf{}
-  \\footnotesize % Email text size
-  %\\hfill\\\\ % Uncomment if left minipage has more lines
-  \\medskip\\hrule
-\\end{minipage}
-\\bigskip 
-
-###COMPACT-TABLE###
-
-###TABLE###
-
-###FINAL-WORDS###
-
-\\end{document}
-`
 
 const BuildPDFSchema = z.object({
   locationIds: z.array(z.number().min(1)).min(1),
@@ -90,149 +19,47 @@ const BuildPDFSchema = z.object({
   directFromStockTaking: z.boolean().optional(),
 })
 
-const buildCompactTable = async (locationIds: number[]) => {
-  const stockData = await db.stockLevel.findMany({
-    where: { locationId: locationIds[0] },
-    include: {
-      variant: {
-        include: {
-          product: { select: { name: true } },
-          modifierValues: {
-            include: { modifierType: { select: { name: true } } },
-          },
-        },
-      },
-    },
-  })
-
-  if (stockData.length === 0) {
-    return "% No stock data available\n"
-  }
-
-  // Group by product
-  const grouped: Record<string, typeof stockData> = {}
-  for (const s of stockData) {
-    const pName = s.variant.product.name
-    if (!grouped[pName]) grouped[pName] = []
-    grouped[pName].push(s)
-  }
-
-  const data = Object.entries(grouped)
-  // sort by product name
-  data.sort((a, b) => a[0].localeCompare(b[0]))
-
-  const allLocations = await db.location.findMany({ where: { id: { in: locationIds } } })
-
-  const locationNames: Record<number, string> = {}
-  for (const loc of allLocations) {
-    locationNames[loc.id] = loc.name
-  }
-
-  const allStockData = await db.stockLevel.findMany({
-    where: { locationId: { in: locationIds } },
-  })
-
-  return buildCompactProductsTable(
-    data.map(([product, variants]) => {
-      return {
-        product,
-        quantity: Object.fromEntries(
-          locationIds.map((locId) => {
-            const stockEntries = allStockData.filter(
-              (s) => variants.some((v) => v.variantId === s.variantId) && s.locationId === locId
-            )
-            const quantity = stockEntries.reduce((sum, entry) => sum + entry.quantity, 0)
-            return [locationNames[locId], quantity]
-          })
-        ),
-      }
-    })
-  ).trim()
-}
-
-const buildTables = async (locationIds: number[]) => {
-  const stockData = await db.stockLevel.findMany({
-    where: { locationId: locationIds[0] },
-    include: {
-      variant: {
-        include: {
-          product: { select: { name: true } },
-          modifierValues: {
-            include: { modifierType: { select: { name: true } } },
-          },
-        },
-      },
-    },
-  })
-
-  if (stockData.length === 0) {
-    return "% No stock data available\n"
-  }
-
-  // Group by product
-  const grouped: Record<string, typeof stockData> = {}
-  for (const s of stockData) {
-    const pName = s.variant.product.name
-    if (!grouped[pName]) grouped[pName] = []
-    grouped[pName].push(s)
-  }
-
-  let latex = ""
-
-  const data = Object.entries(grouped)
-  // sort by product name
-  data.sort((a, b) => a[0].localeCompare(b[0]))
-
-  const allLocations = await db.location.findMany({ where: { id: { in: locationIds } } })
-
-  const locationNames: Record<number, string> = {}
-  for (const loc of allLocations) {
-    locationNames[loc.id] = loc.name
-  }
-
-  const allStockData = await db.stockLevel.findMany({
-    where: { locationId: { in: locationIds } },
-  })
-
-  for (const [product, variants] of data) {
-    // Collect modifier types used only in this product
-    latex += buildProductTable(
-      variants.map((variant) => {
-        return {
-          ...variant,
-          quantity: Object.fromEntries(
-            locationIds.map((locId) => {
-              const stockEntry = allStockData.find(
-                (s) => s.variantId === variant.variantId && s.locationId === locId
-              )
-              return [locationNames[locId], stockEntry ? stockEntry.quantity : -99]
-            })
-          ),
-        }
-      }),
-      product
-    )
-  }
-
-  return latex.trim()
-}
-
-export default resolver.pipe(resolver.zod(BuildPDFSchema), resolver.authorize(), async (data) => {
-  let latexText = template
-
-  if (data.directFromStockTaking) {
-    latexText = latexText.replace("###TITLE###", "Inventur am \\today{}")
-    latexText = latexText.replace(
-      "###FINAL-WORDS###",
-      `\\section*{Abschlussbemerkung}
+const formatTemplateForStocktaking = (template: string): string => {
+  template = template.replace("###TITLE###", "Inventur am \\today{}")
+  return template.replace(
+    "###FINAL-WORDS###",
+    `\\section*{Abschlussbemerkung}
 Die vorliegende Inventur basiert auf einer händischen Zählung der Bestände zum Stichtag. Die erfassten Mengen spiegeln den aktuellen Stand der Lagerbestände wider.
 
 Trotz größter Sorgfalt bei der Zählung können leichte Abweichungen nicht vollständig ausgeschlossen werden.
 `
-    )
-  } else {
-    latexText = latexText.replace("###TITLE###", "Inventarstand \\today{}")
+  )
+}
 
+const formatTemplateCurrent = (template: string, audits: { createdAt: Date }[]): string => {
+  template = template.replace("###TITLE###", "Inventarstand \\today{}")
+
+  const firstDay = dayjs(audits[0].createdAt)
+  const allSameDay = audits?.every((audit) => {
+    const auditDate = dayjs(audit.createdAt)
+    return auditDate.isSame(firstDay, "day")
+  })
+
+  const lastFullStocktakingDate = allSameDay
+    ? dayjs(audits[0].createdAt).format("DD.MM.YYYY")
+    : "einem früheren Datum"
+
+  return template.replace(
+    "###FINAL-WORDS###",
+    `\\section*{Abschlussbemerkung}
+Der vorliegende Bericht basiert auf einer händische Zählung vom ${lastFullStocktakingDate} abzüglich seitdem aufgezeichneter Verkäufe.
+
+Trotz größter Sorgfalt können Abweichungen nicht vollständig ausgeschlossen werden.
+`
+  )
+}
+
+export default resolver.pipe(resolver.zod(BuildPDFSchema), resolver.authorize(), async (data) => {
+  let template = latexTemplate
+
+  if (data.directFromStockTaking) {
+    template = formatTemplateForStocktaking(template)
+  } else {
     const latestPerLocation = await db.auditLogStocktaking.groupBy({
       by: ["locationId"],
       where: { success: true },
@@ -252,37 +79,41 @@ Trotz größter Sorgfalt bei der Zählung können leichte Abweichungen nicht vol
       },
       select: { locationId: true, createdAt: true, id: true },
     })
-
-    const firstDay = dayjs(audits[0].createdAt)
-    const allSameDay = audits?.every((audit) => {
-      const auditDate = dayjs(audit.createdAt)
-      return auditDate.isSame(firstDay, "day")
-    })
-
-    const lastFullStocktakingDate = allSameDay
-      ? dayjs(audits[0].createdAt).format("DD.MM.YYYY")
-      : "einem früheren Datum"
-
-    latexText = latexText.replace(
-      "###FINAL-WORDS###",
-      `\\section*{Abschlussbemerkung}
-Der vorliegende Bericht basiert auf einer händische Zählung vom ${lastFullStocktakingDate} abzüglich seitdem aufgezeichneter Verkäufe.
-
-Trotz größter Sorgfalt können Abweichungen nicht vollständig ausgeschlossen werden.
-`
-    )
+    template = formatTemplateCurrent(template, audits)
   }
 
-  if (data.includeCompact) {
-    latexText = latexText.replace("###COMPACT-TABLE###", await buildCompactTable(data.locationIds))
-  } else {
-    latexText = latexText.replace("###COMPACT-TABLE###", "%\n")
-  }
+  const allLocations = await db.location.findMany({ where: { id: { in: data.locationIds } } })
 
-  latexText = latexText.replace("###TABLE###", await buildTables(data.locationIds))
+  const stockData = await db.stockLevel.findMany({
+    where: { locationId: data.locationIds[0] },
+    include: {
+      variant: {
+        include: {
+          product: { select: { name: true } },
+          modifierValues: {
+            include: { modifierType: { select: { name: true } } },
+          },
+        },
+      },
+    },
+  })
+
+  const stockLevels = await db.stockLevel.findMany({
+    where: { locationId: { in: data.locationIds } },
+  })
+
+  template = template.replace(
+    "###COMPACT-TABLE###",
+    data.includeCompact ? await buildCompactTable(allLocations, stockLevels, stockData) : "%\n"
+  )
+
+  template = template.replace(
+    "###TABLE###",
+    await buildTables(allLocations, stockLevels, stockData)
+  )
 
   // render latex to pdf
-  return await renderToPDF(latexText)
+  return await renderToPDF(template)
 })
 
 async function renderToPDF(latexText: string): Promise<Uint8Array> {
