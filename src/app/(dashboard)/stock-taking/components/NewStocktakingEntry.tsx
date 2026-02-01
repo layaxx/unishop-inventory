@@ -8,6 +8,7 @@ import isActiveInventory from "../queries/isActiveInventory"
 import Form, { FORM_ERROR } from "@/src/app/components/Form"
 import LabeledTextField from "@/src/app/components/LabeledTextField"
 import VariantSelector from "@/src/app/components/VariantSelector"
+import { FieldLabel } from "@/components/ui/field"
 
 const NewStocktakingEntry: FC<{ locationId: number; innerRef: React.Ref<any> }> = ({
   locationId,
@@ -39,6 +40,7 @@ const NewStocktakingEntry: FC<{ locationId: number; innerRef: React.Ref<any> }> 
     >
       <div className="flex flex-wrap space-x-4 mb-4">
         <div>
+          <FieldLabel className="mb-3">Location</FieldLabel>
           <VariantSelector name="variantId" label="Variant" />
         </div>
         <div>

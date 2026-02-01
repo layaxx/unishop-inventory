@@ -1,6 +1,6 @@
 "use client"
 
-import { useMutation, useQuery } from "@blitzjs/rpc"
+import { useQuery } from "@blitzjs/rpc"
 import getInventoryEntries from "../queries/getInventoryEntries"
 import getLocations from "../../locations/queries/getLocations"
 import {
@@ -18,6 +18,7 @@ import CombinedPDF from "./CombinedPDF"
 import PastReports from "../../reports/components/PastReports"
 import { Await } from "blitz"
 import { FC } from "react"
+import { Button } from "@/components/ui/button"
 
 type Props = {
   inventoryEntriesInitialData?: Await<ReturnType<typeof getInventoryEntries>>
@@ -47,17 +48,22 @@ const StocktakingOverview: FC<Props> = ({
             ? dayjs(lastAudit?.createdAt).format("DD.MM.YYYY")
             : "No audit found"
 
+          const isActive = inventoryEntries?.some((entry) => entry.locationId === location.id)
           return (
             <Card key={location.id} className="w-full max-w-5/12">
               <CardHeader>
                 <CardTitle>{location.name}</CardTitle>
                 <CardDescription>
-                  {inventoryEntries?.some((entry) => entry.locationId === location.id)
+                  {isActive
                     ? "There is an active stocktaking process at this location."
                     : "No stocktaking active."}
                 </CardDescription>
                 <CardAction>
-                  <Link href={`/stock-taking/locations/${location.id}`}>Go to process</Link>
+                  <Button variant={isActive ? "default" : "outline"} size="sm">
+                    <Link href={`/stock-taking/locations/${location.id}`}>
+                      {isActive ? "Go to process" : "Start process"}
+                    </Link>
+                  </Button>
                 </CardAction>
               </CardHeader>
               <CardContent>
