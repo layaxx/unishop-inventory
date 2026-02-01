@@ -10,8 +10,8 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
 
   // Prefetch sidebar data on server
   const [products, locationsResult] = await Promise.all([
-    invoke(getProductsSimple, { select: { id: true, name: true } }),
-    invoke(getLocations, { take: 10 }),
+    invoke(getProductsSimple, { select: { id: true, name: true }, take: 5 }),
+    invoke(getLocations, { take: 5 }),
   ])
 
   return (
