@@ -15,12 +15,12 @@ type Props = {
 export default function ProdLocNav({ initialProducts, initialLocations }: Props) {
   const [products] = useQuery(
     getProductsSimple,
-    { select: { id: true, name: true } },
+    { select: { id: true, name: true }, take: 5 },
     { initialData: initialProducts }
   )
   const [locations] = useQuery(
     getLocations,
-    { take: 10 },
+    { take: 5 },
     { initialData: { locations: initialLocations } }
   )
   return (
