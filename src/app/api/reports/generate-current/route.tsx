@@ -11,7 +11,7 @@ export const { GET } = withBlitzAuth({
     }
     let report
     try {
-      report = await buildPDF({ directFromStockTaking: false }, ctx)
+      report = await buildPDF({ directFromStockTaking: false, includeCompact: true }, ctx)
     } catch (e) {
       console.log("Error generating PDF report:", e)
       return new NextResponse("Failed to generate report", { status: 500 })
