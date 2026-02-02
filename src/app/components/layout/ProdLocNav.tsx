@@ -15,7 +15,7 @@ type Props = {
 export default function ProdLocNav({ initialProducts, initialLocations }: Props) {
   const [products] = useQuery(
     getProductsSimple,
-    { select: { id: true, name: true }, take: 5 },
+    { select: { id: true, name: true } },
     { initialData: initialProducts }
   )
   const [locations] = useQuery(
@@ -32,7 +32,7 @@ export default function ProdLocNav({ initialProducts, initialLocations }: Props)
           icon: Shirt,
           isActive: true,
           items: [
-            ...(products?.map((product) => ({
+            ...(products?.slice(0, 5).map((product) => ({
               title: product.name,
               url: `/products/${product.id}`,
             })) ?? []),
