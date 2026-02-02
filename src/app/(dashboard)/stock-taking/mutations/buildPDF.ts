@@ -52,7 +52,7 @@ const formatTemplateCurrent = (template: string, audits: { createdAt: Date }[]):
   return template.replace(
     "###FINAL-WORDS###",
     `\\section*{Abschlussbemerkung}
-Der vorliegende Bericht basiert auf einer händische Zählung vom ${lastFullStocktakingDate} abzüglich seitdem aufgezeichneter Verkäufe.
+Der vorliegende Bericht basiert auf einer händischen Zählung vom ${lastFullStocktakingDate} abzüglich seitdem aufgezeichneter Verkäufe.
 
 Trotz größter Sorgfalt können Abweichungen nicht vollständig ausgeschlossen werden.
 `
@@ -61,7 +61,7 @@ Trotz größter Sorgfalt können Abweichungen nicht vollständig ausgeschlossen 
 
 export default resolver.pipe(resolver.zod(BuildPDFSchema), resolver.authorize(), async (data) => {
   if ((!data.auditIds || data.auditIds.length === 0) && data.directFromStockTaking) {
-    throw new Error("Either auditIds or directFromStockTaking must be provided")
+    throw new Error("If directFromStockTaking is true, auditIds must be provided")
   }
 
   let template = latexTemplate
