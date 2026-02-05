@@ -36,17 +36,17 @@ const LocationSelector: FC<{ name: string; label: string }> = ({ name, label }) 
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[200px] justify-between"
+            className="w-50 justify-between"
           >
             {activeLocationName ?? "Select location..."}
             <ChevronsUpDown className="opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[200px] p-0">
+        <PopoverContent className="w-50 p-0">
           <Command>
             <CommandInput placeholder="Search location..." className="h-9" />
             <CommandList>
-              <CommandEmpty>No framework found.</CommandEmpty>
+              <CommandEmpty>No Location found.</CommandEmpty>
               <CommandGroup>
                 {locationsResult?.locations.map((location) => (
                   <CommandItem

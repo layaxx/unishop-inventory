@@ -24,8 +24,8 @@ A lightweight inventory system used by the official Unishop at the University of
 
 ## Prerequisites
 
-- Node.js 20+ (recommended) + yarn
-- Docker & Docker Compose (optional, recommended for local DB)
+* Node.js 20+ (recommended) + yarn
+* Docker & Docker Compose (optional, recommended for local DB)
 
 ## Environment
 
@@ -36,7 +36,6 @@ DATABASE_URL="postgresql://<user>:<password>@localhost:5432/<db>?schema=public"
 ```
 
 When using the included `docker-compose.yml`, the DB runs on Postgres 18-alpine and reads env values from `.env.local`.
-
 
 ## Example Report
 
