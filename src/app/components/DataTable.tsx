@@ -46,7 +46,14 @@ export function DataTable<TData extends DataType, TValue>({
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
                 return (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className={clsx(
+                      header.column.columnDef.meta?.align
+                        ? `text-${header.column.columnDef.meta.align}`
+                        : ""
+                    )}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}

@@ -26,21 +26,9 @@ const VariantOverview: FC<Props> = ({ productId, initialTypes, initialVariants }
     if (!variants || !types || types.length !== 2) return []
 
     const rows = types[0].values.map((value) => {
-      const variant = variants.productVariants.find((v) =>
-        v.modifierValues?.some(
-          (mv) => mv.modifierTypeId === types[0].id && mv.value === value.value
-        )
-      )
-
       const obj: Record<string, any> = { mod0: value.value }
 
-      const stockLevels = variant?.stockLevels ?? []
-      const totalStock = stockLevels.reduce(
-        (acc: number, level: any) => acc + (level?.quantity ?? 0),
-        0
-      )
-      obj["totalStock"] = totalStock
-
+      let totalStock = 0
       types[1].values.forEach((value2) => {
         const variant2 = variants.productVariants.find((v) =>
           v.modifierValues?.some(
@@ -53,14 +41,16 @@ const VariantOverview: FC<Props> = ({ productId, initialTypes, initialVariants }
           )
         )
 
-        const stockLevels2 = variant2?.stockLevels ?? []
-        const totalStock2 = stockLevels2.reduce(
+        const stockLevels = variant2?.stockLevels ?? []
+        const stock = stockLevels.reduce(
           (acc: number, level: any) => acc + (level?.quantity ?? 0),
           0
         )
 
-        obj["mod1_" + value2.id] = totalStock2
+        obj["mod1_" + value2.id] = stock
+        totalStock += stock
       })
+      obj.totalStock = totalStock
       return obj
     })
 

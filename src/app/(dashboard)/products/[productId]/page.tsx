@@ -63,7 +63,7 @@ export default async function Page(props: ProductPageProps) {
 
         <Modifiers productId={product.id} initialData={initialTypes} />
 
-        <div className="flex">
+        <div className="flex flex-wrap">
           <VariantOverview
             productId={product.id}
             initialTypes={initialTypes}
