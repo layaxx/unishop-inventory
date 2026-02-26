@@ -10,6 +10,7 @@ import DeleteLink from "../components/DeleteLink"
 import getProductModifierTypes from "../queries/getProductModifierTypes"
 import getLocations from "../../locations/queries/getLocations"
 import getProductVariantsWithStocksAndValues from "../queries/getProductVariantsWithStocksAndValues"
+import VariantOverviewShort from "../components/variants/VariantOverviewShort"
 
 type ProductPageProps = {
   params: Promise<{ productId: string }>
@@ -61,12 +62,20 @@ export default async function Page(props: ProductPageProps) {
         <DeleteLink productId={product.id} />
 
         <Modifiers productId={product.id} initialData={initialTypes} />
-        <VariantOverview
-          productId={product.id}
-          initialTypes={initialTypes}
-          initialVariants={initialVariants}
-          initialLocations={initialLocations}
-        />
+
+        <div className="flex">
+          <VariantOverview
+            productId={product.id}
+            initialTypes={initialTypes}
+            initialVariants={initialVariants}
+            initialLocations={initialLocations}
+          />
+          <VariantOverviewShort
+            productId={product.id}
+            initialTypes={initialTypes}
+            initialVariants={initialVariants}
+          />
+        </div>
       </div>
     </div>
   )

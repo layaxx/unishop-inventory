@@ -82,8 +82,8 @@ const VariantOverview: FC<Props> = ({
   }, [variants, types, locations])
 
   return (
-    <div className="mt-4">
-      <h2 className="font-bold text-4xl">Variants</h2>
+    <div className="mt-4 max-w-fit min-w-1/2 pe-4">
+      <h2 className="font-bold text-4xl">Variants by Location</h2>
       <DataTable
         data={tableData}
         columns={[

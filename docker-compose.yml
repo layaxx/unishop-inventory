@@ -5,7 +5,7 @@ services:
     image: postgres:18-alpine
     env_file: .env.local
     volumes:
-      - psql_dev:/var/lib/postgresql/data
+      - psql:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 

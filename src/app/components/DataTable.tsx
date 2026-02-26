@@ -10,8 +10,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import clsx from "clsx"
 
-type DataType = Record<string, any> & { rowspan?: number }
+declare module "@tanstack/react-table" {
+  interface ColumnMeta<TData, TValue> {
+    align?: "left" | "center" | "right"
+  }
+}
+
+type DataType = Record<string, any> & {
+  rowspan?: number
+  meta?: { isBold?: boolean }
+}
 
 interface DataTableProps<TData extends DataType, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -59,6 +69,12 @@ export function DataTable<TData extends DataType, TValue>({
                     <TableCell
                       key={cell.id}
                       rowSpan={cellIndex === 0 ? row.original.rowspan || 1 : 1}
+                      className={clsx(
+                        cell.column.columnDef.meta?.align
+                          ? `text-${cell.column.columnDef.meta.align}`
+                          : "",
+                        row.original.meta?.isBold ? "font-bold" : ""
+                      )}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
