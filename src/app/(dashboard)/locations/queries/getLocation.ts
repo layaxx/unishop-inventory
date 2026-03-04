@@ -2,17 +2,22 @@ import { NotFoundError } from "blitz"
 import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { z } from "zod"
+import { ROLES_WITH_READ_ACCESS } from "@/src/app/(auth)/validations"
 
 const GetLocation = z.object({
   // This accepts type of undefined, but is required at runtime
   id: z.number().optional().refine(Boolean, "Required"),
 })
 
-export default resolver.pipe(resolver.zod(GetLocation), resolver.authorize(), async ({ id }) => {
-  // TODO: in multi-tenant app, you must add validation to ensure correct tenant
-  const location = await db.location.findFirst({ where: { id } })
+export default resolver.pipe(
+  resolver.zod(GetLocation),
+  resolver.authorize(ROLES_WITH_READ_ACCESS),
+  async ({ id }) => {
+    // TODO: in multi-tenant app, you must add validation to ensure correct tenant
+    const location = await db.location.findFirst({ where: { id } })
 
-  if (!location) throw new NotFoundError()
+    if (!location) throw new NotFoundError()
 
-  return location
-})
+    return location
+  }
+)

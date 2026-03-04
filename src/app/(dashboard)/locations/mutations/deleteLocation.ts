@@ -1,10 +1,11 @@
 import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { DeleteLocationSchema } from "../schemas"
+import { ROLES_WITH_WRITE_ACCESS } from "@/src/app/(auth)/validations"
 
 export default resolver.pipe(
   resolver.zod(DeleteLocationSchema),
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_WRITE_ACCESS),
   async ({ id }) => {
     // TODO: in multi-tenant app, you must add validation to ensure correct tenant
     const location = await db.location.deleteMany({ where: { id } })

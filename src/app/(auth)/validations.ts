@@ -1,3 +1,4 @@
+import { Role } from "db/generated/prisma/enums"
 import { z } from "zod"
 
 export const email = z
@@ -36,3 +37,7 @@ export const ChangePassword = z.object({
   currentPassword: z.string(),
   newPassword: password,
 })
+
+export const ROLES_WITH_READ_ACCESS = [Role.ADMIN, Role.REGULAR, Role.OBSERVER] as const
+
+export const ROLES_WITH_WRITE_ACCESS = [Role.ADMIN, Role.REGULAR] as const

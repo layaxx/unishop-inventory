@@ -1,10 +1,11 @@
 import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { DeleteProductModifierTypeSchema } from "../schemas"
+import { ROLES_WITH_WRITE_ACCESS } from "@/src/app/(auth)/validations"
 
 export default resolver.pipe(
   resolver.zod(DeleteProductModifierTypeSchema),
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_WRITE_ACCESS),
   async ({ id }) => {
     const values = await db.productModifierValue.findMany({
       where: { modifierTypeId: id },

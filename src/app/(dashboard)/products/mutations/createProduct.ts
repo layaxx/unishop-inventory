@@ -1,10 +1,11 @@
 import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { CreateProductSchema } from "../schemas"
+import { ROLES_WITH_WRITE_ACCESS } from "@/src/app/(auth)/validations"
 
 export default resolver.pipe(
   resolver.zod(CreateProductSchema),
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_WRITE_ACCESS),
   async (input) => {
     const locations = await db.location.findMany()
 

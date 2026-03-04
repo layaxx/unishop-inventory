@@ -7,6 +7,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   await useAuthenticatedBlitzContext({
     redirectTo: "/login",
   })
+  // TODO: maybe redirect new users to /insufficient-permission ?
 
   // Prefetch sidebar data on server
   const [products, locationsResult] = await Promise.all([

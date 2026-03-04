@@ -2,12 +2,11 @@ import { resolver } from "@blitzjs/rpc"
 import db, { MovementType } from "db"
 import { FinalizeStocktakingInput } from "../schemas"
 import buildPDF from "./buildPDF"
-import { create } from "node:domain"
-import { connect } from "node:http2"
+import { ROLES_WITH_WRITE_ACCESS } from "@/src/app/(auth)/validations"
 
 export default resolver.pipe(
   resolver.zod(FinalizeStocktakingInput),
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_WRITE_ACCESS),
   async ({ locationId }, ctx) => {
     // assert no untracked variants exist
     const trackedVariantIds = await db.inventoryEntry.findMany({

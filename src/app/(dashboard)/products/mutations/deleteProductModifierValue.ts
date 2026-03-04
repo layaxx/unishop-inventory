@@ -1,12 +1,13 @@
 import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { DeleteProductModifierValueSchema } from "../schemas"
+import { ROLES_WITH_WRITE_ACCESS } from "@/src/app/(auth)/validations"
 
 // TODO: dont remove for last value of type
 
 export default resolver.pipe(
   resolver.zod(DeleteProductModifierValueSchema),
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_WRITE_ACCESS),
   async ({ id }) => {
     const existing = await db.productModifierValue.findUnique({
       where: { id },

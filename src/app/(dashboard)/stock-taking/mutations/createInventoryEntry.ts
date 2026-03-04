@@ -1,10 +1,11 @@
 import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { CreateInventoryEntrySchema } from "../schemas"
+import { ROLES_WITH_WRITE_ACCESS } from "@/src/app/(auth)/validations"
 
 export default resolver.pipe(
   resolver.zod(CreateInventoryEntrySchema),
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_WRITE_ACCESS),
   async (input) => {
     const entry = db.inventoryEntry.create({
       data: {

@@ -1,6 +1,7 @@
 import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { CreateProductModifierValueSchema } from "../schemas"
+import { ROLES_WITH_WRITE_ACCESS } from "@/src/app/(auth)/validations"
 
 function getCombinations(types: { name: string; ids: number[] }[]): Record<string, number>[] {
   return types.reduce(
@@ -18,7 +19,7 @@ function getCombinations(types: { name: string; ids: number[] }[]): Record<strin
 
 export default resolver.pipe(
   resolver.zod(CreateProductModifierValueSchema),
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_WRITE_ACCESS),
   async (input) => {
     const type = await db.productModifierType.findUnique({
       where: { id: input.modifierTypeId },

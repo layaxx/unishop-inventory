@@ -1,14 +1,13 @@
 import { resolver } from "@blitzjs/rpc"
-import db from "db"
+import db, { Role } from "db"
 import { UpdateUserSchema } from "../schemas"
 
 export default resolver.pipe(
   resolver.zod(UpdateUserSchema),
-  resolver.authorize(),
+  resolver.authorize(Role.ADMIN),
   async ({ id, ...data }) => {
-    // TODO: in multi-tenant app, you must add validation to ensure correct tenant
-    const location = await db.location.update({ where: { id }, data })
+    const user = await db.user.update({ where: { id }, data })
 
-    return location
+    return user
   }
 )

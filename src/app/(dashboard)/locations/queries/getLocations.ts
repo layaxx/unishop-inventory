@@ -1,12 +1,13 @@
 import { paginate } from "blitz"
 import { resolver } from "@blitzjs/rpc"
 import db, { Prisma } from "db"
+import { ROLES_WITH_READ_ACCESS } from "@/src/app/(auth)/validations"
 
 interface GetLocationsInput
   extends Pick<Prisma.LocationFindManyArgs, "where" | "orderBy" | "skip" | "take"> {}
 
 export default resolver.pipe(
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_READ_ACCESS),
   async ({ where, orderBy, skip = 0, take = 100 }: GetLocationsInput) => {
     // TODO: in multi-tenant app, you must add validation to ensure correct tenant
     const {

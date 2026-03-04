@@ -1,10 +1,11 @@
 import { resolver } from "@blitzjs/rpc"
 import db from "db"
 import { GetUntrackedEntitySchema } from "../schemas"
+import { ROLES_WITH_READ_ACCESS } from "@/src/app/(auth)/validations"
 
 export default resolver.pipe(
   resolver.zod(GetUntrackedEntitySchema),
-  resolver.authorize(),
+  resolver.authorize(ROLES_WITH_READ_ACCESS),
   async ({ where }) => {
     const trackedVariantIds = await db.inventoryEntry.findMany({
       select: { variantId: true },

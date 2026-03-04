@@ -1,8 +1,9 @@
 import db from "@/db"
 import { resolver } from "@blitzjs/rpc"
 import buildPDF from "./buildPDF"
+import { ROLES_WITH_WRITE_ACCESS } from "@/src/app/(auth)/validations"
 
-export default resolver.pipe(resolver.authorize(), async (_data, ctx) => {
+export default resolver.pipe(resolver.authorize(ROLES_WITH_WRITE_ACCESS), async (_data, ctx) => {
   const allLocations = (await db.location.findMany()).map((loc) => loc.id)
 
   const audits = await Promise.all(

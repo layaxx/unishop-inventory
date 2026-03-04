@@ -1,4 +1,5 @@
 import db from "@/db"
+import { ROLES_WITH_READ_ACCESS } from "@/src/app/(auth)/validations"
 import buildPDF from "@/src/app/(dashboard)/stock-taking/mutations/buildPDF"
 import { withBlitzAuth } from "@/src/app/blitz-server"
 import dayjs from "dayjs"
@@ -6,7 +7,7 @@ import { NextResponse } from "next/server"
 
 export const { GET } = withBlitzAuth({
   GET: async (_request, _params, ctx) => {
-    if (!ctx.session.$isAuthorized()) {
+    if (!ctx.session.$isAuthorized(ROLES_WITH_READ_ACCESS)) {
       return new NextResponse("Unauthorized", { status: 401 })
     }
     let report

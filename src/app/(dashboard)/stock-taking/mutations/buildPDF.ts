@@ -15,6 +15,7 @@ import {
   TableInputStockData,
   TableInputStockLevels,
 } from "@/lib/pdf/tables/types"
+import { ROLES_WITH_READ_ACCESS } from "@/src/app/(auth)/validations"
 
 const execAsync = promisify(exec)
 
@@ -59,115 +60,121 @@ Trotz größter Sorgfalt können Abweichungen nicht vollständig ausgeschlossen 
   )
 }
 
-export default resolver.pipe(resolver.zod(BuildPDFSchema), resolver.authorize(), async (data) => {
-  if ((!data.auditIds || data.auditIds.length === 0) && data.directFromStockTaking) {
-    throw new Error("If directFromStockTaking is true, auditIds must be provided")
-  }
-
-  let template = latexTemplate
-
-  if (data.directFromStockTaking) {
-    template = formatTemplateForStocktaking(template)
-  } else {
-    const latestPerLocation = await db.auditLogStocktaking.groupBy({
-      by: ["locationId"],
-      where: { success: true },
-      _max: {
-        createdAt: true,
-      },
-    })
-
-    const audits = await db.auditLogStocktaking.findMany({
-      where: {
-        OR: latestPerLocation
-          .filter((x) => x._max.createdAt)
-          .map((x) => ({
-            locationId: x.locationId,
-            createdAt: x._max.createdAt!,
-          })),
-      },
-      select: { locationId: true, createdAt: true, id: true },
-    })
-    template = formatTemplateCurrent(template, audits)
-  }
-
-  let relevantLocations: TableInputLocations = []
-  let stockLevels: TableInputStockLevels = []
-  let stockData: TableInputStockData = []
-  if (data.directFromStockTaking) {
-    const audits = await db.auditLogStocktaking.findMany({
-      where: { id: { in: data.auditIds } },
-    })
-
-    relevantLocations = await db.location.findMany({
-      where: { id: { in: audits.map((a) => a.locationId) } },
-    })
-
-    if (relevantLocations.length === 0) {
-      throw new Error("No locations found for the provided audit IDs")
-    } else if (relevantLocations.length !== data.auditIds!.length) {
-      throw new Error("Some audits do not have a corresponding location")
+export default resolver.pipe(
+  resolver.zod(BuildPDFSchema),
+  resolver.authorize(ROLES_WITH_READ_ACCESS),
+  async (data) => {
+    if ((!data.auditIds || data.auditIds.length === 0) && data.directFromStockTaking) {
+      throw new Error("If directFromStockTaking is true, auditIds must be provided")
     }
 
-    stockData = await db.stockLevel.findMany({
-      where: { locationId: relevantLocations[0].id },
-      include: {
-        variant: {
-          include: {
-            product: { select: { name: true } },
-            modifierValues: {
-              include: { modifierType: { select: { name: true } } },
-            },
-          },
-        },
-      },
-    })
+    let template = latexTemplate
 
-    stockLevels = (
-      await db.stocktakingCount.findMany({
-        where: { auditLogStocktakingId: { in: data.auditIds } },
-        include: { auditLogStocktaking: true },
+    if (data.directFromStockTaking) {
+      template = formatTemplateForStocktaking(template)
+    } else {
+      const latestPerLocation = await db.auditLogStocktaking.groupBy({
+        by: ["locationId"],
+        where: { success: true },
+        _max: {
+          createdAt: true,
+        },
       })
-    ).map((entry) => ({
-      variantId: entry.variantId,
-      locationId: entry.auditLogStocktaking.locationId,
-      quantity: entry.quantityCounted,
-    }))
-  } else {
-    relevantLocations = await db.location.findMany()
 
-    stockData = await db.stockLevel.findMany({
-      where: { locationId: relevantLocations[0].id },
-      include: {
-        variant: {
-          include: {
-            product: { select: { name: true } },
-            modifierValues: {
-              include: { modifierType: { select: { name: true } } },
+      const audits = await db.auditLogStocktaking.findMany({
+        where: {
+          OR: latestPerLocation
+            .filter((x) => x._max.createdAt)
+            .map((x) => ({
+              locationId: x.locationId,
+              createdAt: x._max.createdAt!,
+            })),
+        },
+        select: { locationId: true, createdAt: true, id: true },
+      })
+      template = formatTemplateCurrent(template, audits)
+    }
+
+    let relevantLocations: TableInputLocations = []
+    let stockLevels: TableInputStockLevels = []
+    let stockData: TableInputStockData = []
+    if (data.directFromStockTaking) {
+      const audits = await db.auditLogStocktaking.findMany({
+        where: { id: { in: data.auditIds } },
+      })
+
+      relevantLocations = await db.location.findMany({
+        where: { id: { in: audits.map((a) => a.locationId) } },
+      })
+
+      if (relevantLocations.length === 0) {
+        throw new Error("No locations found for the provided audit IDs")
+      } else if (relevantLocations.length !== data.auditIds!.length) {
+        throw new Error("Some audits do not have a corresponding location")
+      }
+
+      stockData = await db.stockLevel.findMany({
+        where: { locationId: relevantLocations[0].id },
+        include: {
+          variant: {
+            include: {
+              product: { select: { name: true } },
+              modifierValues: {
+                include: { modifierType: { select: { name: true } } },
+              },
             },
           },
         },
-      },
-    })
+      })
 
-    stockLevels = await db.stockLevel.findMany({
-      where: { locationId: { in: relevantLocations.map((loc) => loc.id) } },
-    })
+      stockLevels = (
+        await db.stocktakingCount.findMany({
+          where: { auditLogStocktakingId: { in: data.auditIds } },
+          include: { auditLogStocktaking: true },
+        })
+      ).map((entry) => ({
+        variantId: entry.variantId,
+        locationId: entry.auditLogStocktaking.locationId,
+        quantity: entry.quantityCounted,
+      }))
+    } else {
+      relevantLocations = await db.location.findMany()
+
+      stockData = await db.stockLevel.findMany({
+        where: { locationId: relevantLocations[0].id },
+        include: {
+          variant: {
+            include: {
+              product: { select: { name: true } },
+              modifierValues: {
+                include: { modifierType: { select: { name: true } } },
+              },
+            },
+          },
+        },
+      })
+
+      stockLevels = await db.stockLevel.findMany({
+        where: { locationId: { in: relevantLocations.map((loc) => loc.id) } },
+      })
+    }
+
+    template = template.replace(
+      "###COMPACT-TABLE###",
+      data.includeCompact
+        ? await buildCompactTable(relevantLocations, stockLevels, stockData)
+        : "%\n"
+    )
+
+    template = template.replace(
+      "###TABLE###",
+      await buildTables(relevantLocations, stockLevels, stockData)
+    )
+
+    // render latex to pdf
+    return await renderToPDF(template)
   }
-
-  template = template.replace(
-    "###COMPACT-TABLE###",
-    data.includeCompact ? await buildCompactTable(relevantLocations, stockLevels, stockData) : "%\n"
-  )
-
-  template = template.replace(
-    "###TABLE###",
-    await buildTables(relevantLocations, stockLevels, stockData)
-  )
-
-  // render latex to pdf
-  return await renderToPDF(template)
-})
+)
 
 async function renderToPDF(latexText: string): Promise<Uint8Array> {
   const tmpDirectory = await fs.mkdtemp(join(tmpdir(), "latex-inventory"))
